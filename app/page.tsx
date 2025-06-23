@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <main>
       <Header />
-      <div className="bg-[#875CF5]">
+      <div className="flex flex-col items-center bg-[#875CF5]">
         <h1>Escolha sua Fandom</h1>
         <p>Explore comunidades dedicadas aos seus universos favoritos. Conecte-se com outros fãs, compartilhe teorias e celebre suas paixões.</p>
       </div>
