@@ -25,7 +25,7 @@ export default function Header() {
   }, []);
 
   return (
-    <div className="flex justify-around items-center bg-[#926DF6] text-white min-w-md ">
+    <div className="flex justify-around items-center bg-[#926DF6] text-white">
       <p className="text-[50px] font-bold">FandomVerse</p>
       {/* FetchInstruments é para checar pelo console.log se os arrays estão vindo */}
       {/* <FetchInstruments /> */}

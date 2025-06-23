@@ -1,21 +1,19 @@
-// import { DeployButton } from "@/components/deploy-button";
-// import { EnvVarWarning } from "@/components/env-var-warning";
-// import { AuthButton } from "@/components/auth-button";
-// import { Hero } from "@/components/hero";
-// import { ThemeSwitcher } from "@/components/theme-switcher";
-// import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-// import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-// import { hasEnvVars } from "@/lib/utils";
-// import Link from "next/link";
 import Header from "@/components/ui/Header";
+import FamdomCard from "@/components/ui/FamdomCard";
 
 export default function Home() {
   return (
     <main>
       <Header />
-      <div className="flex flex-col items-center bg-[#875CF5]">
-        <h1>Escolha sua Fandom</h1>
-        <p>Explore comunidades dedicadas aos seus universos favoritos. Conecte-se com outros fãs, compartilhe teorias e celebre suas paixões.</p>
+      <div className="flex flex-col items-center bg-[#875CF5] mt-[20px]">
+        <h1 className="text-[50px] text-white font-bold">Escolha sua Fandom</h1>
+        <p className="text-[20px] text-[#E3DBFC]">Explore comunidades dedicadas aos seus universos favoritos. Conecte-se com outros fãs, compartilhe teorias e celebre suas paixões.</p>
+      </div>
+      <div className="">
+        <p>search bar</p>
+        <div>
+          <FamdomCard />
+        </div>
       </div>
     </main>
   );
