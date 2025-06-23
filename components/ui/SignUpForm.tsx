@@ -1,26 +1,28 @@
-// tutorial/components/ui/LoginForm.tsx
+// tutorial/components/ui/SignUpForm.tsx
 'use client';
 
 import { useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 
-export default function LoginForm() {
+export default function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setSuccess(null);
+    const { error } = await supabase.auth.signUp({ email, password });
     if (error) setError(error.message);
-    else router.push("/"); // Redireciona para home após login
+    else setSuccess("Cadastro realizado! Verifique seu e-mail para confirmar.");
   };
 
   return (
-    <form onSubmit={handleLogin} className="flex flex-col gap-2 max-w-sm mx-auto mt-10">
+    <form onSubmit={handleSignUp} className="flex flex-col gap-2 max-w-sm mx-auto mt-10">
       <input
         type="email"
         placeholder="E-mail"
@@ -37,8 +39,9 @@ export default function LoginForm() {
         className="p-2 rounded"
         required
       />
-      <button type="submit" className="bg-[#A98AF8] text-white rounded p-2">Entrar</button>
+      <button type="submit" className="bg-[#A98AF8] text-white rounded p-2">Cadastrar</button>
       {error && <span className="text-red-500">{error}</span>}
+      {success && <span className="text-green-500">{success}</span>}
     </form>
   );
 }

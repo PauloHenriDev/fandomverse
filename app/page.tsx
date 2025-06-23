@@ -9,9 +9,9 @@ export default function Home() {
         <h1 className="text-[50px] text-white font-bold">Escolha sua Fandom</h1>
         <p className="text-[20px] text-[#E3DBFC]">Explore comunidades dedicadas aos seus universos favoritos. Conecte-se com outros fãs, compartilhe teorias e celebre suas paixões.</p>
       </div>
-      <div className="">
+      <div className="flex flex-col items-center pl-[150px] pr-[150px]">
         <p>search bar</p>
-        <div>
+        <div className="flex flex-wrap gap-[20px]">
           <FamdomCard />
         </div>
       </div>
