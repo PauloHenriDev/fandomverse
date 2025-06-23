@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
@@ -28,7 +29,7 @@ export default function ProfilePage() {
   }, [router]);
 
   const loadProfile = async (userId: string) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('profiles')
       .select('nickname, avatar_url')
       .eq('id', userId)
@@ -98,8 +99,9 @@ export default function ProfilePage() {
       setAvatarUrl(publicUrl);
       setMessage("Foto atualizada com sucesso!");
       
-    } catch (error: any) {
-      setMessage("Erro ao fazer upload da imagem: " + (error.message || "Erro desconhecido"));
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      setMessage("Erro ao fazer upload da imagem: " + errorMessage);
       console.error("Upload error:", error);
     } finally {
       setLoading(false);
@@ -128,9 +130,11 @@ export default function ProfilePage() {
         {/* Avatar */}
         <div className="text-center">
           <div className="relative inline-block">
-            <img
+            <Image
               src={avatarUrl || `https://ui-avatars.com/api/?name=${user.email}&size=100&background=926DF6&color=fff`}
               alt="Avatar"
+              width={96}
+              height={96}
               className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-[#926DF6]"
             />
             <label className="absolute bottom-0 right-0 bg-[#926DF6] text-white p-2 rounded-full cursor-pointer hover:bg-[#A98AF8] transition-colors">

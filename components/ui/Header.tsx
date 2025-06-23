@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { User, Session } from "@supabase/supabase-js";
 import Link from "next/link";
+import Image from "next/image";
 // import FetchInstruments from "./FetchInstruments";
 
 export default function Header() {
@@ -63,9 +64,11 @@ export default function Header() {
           {/* Ícone de usuário como SVG ou foto */}
           <Link href="/profile">
             {avatarUrl ? (
-              <img
+              <Image
                 src={avatarUrl}
                 alt="Avatar"
+                width={36}
+                height={36}
                 className="w-9 h-9 rounded-full cursor-pointer hover:opacity-80 transition-opacity border-2 border-white"
               />
             ) : (
