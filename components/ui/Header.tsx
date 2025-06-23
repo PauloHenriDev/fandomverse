@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { User, Session } from "@supabase/supabase-js";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 // import FetchInstruments from "./FetchInstruments";
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     // Verifica usuário atual
