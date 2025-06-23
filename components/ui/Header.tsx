@@ -91,12 +91,12 @@ export default function Header() {
         </div>
       ) : (
         <div className="flex items-center gap-[15px]">
-          <Link href="/auth/login" passHref legacyBehavior>
+          <Link href="/auth/login">
             <button className="h-[35px] w-[70px] rounded-[6px] bg-[#A98AF8] text-white hover:bg-[#AE9AF8] transition-colors">
               <p>Entrar</p>
             </button>
           </Link>
-          <Link href="/auth/sign-up" passHref legacyBehavior>
+          <Link href="/auth/sign-up">
             <button className="h-[35px] w-[100px] rounded-[6px] bg-white hover:bg-[#E0E7FF] transition-colors">
               <p className="text-[#5047E5] transition-colors">Cadastrar</p>
             </button>
