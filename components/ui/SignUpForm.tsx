@@ -17,8 +17,12 @@ export default function SignUpForm() {
     setError(null);
     setSuccess(null);
     const { error } = await supabase.auth.signUp({ email, password });
-    if (error) setError(error.message);
-    else setSuccess("Cadastro realizado! Verifique seu e-mail para confirmar.");
+    if (error) {
+      setError(error.message);
+    } else {
+      setSuccess("Cadastro realizado! Verifique seu e-mail para confirmar.");
+      setTimeout(() => router.push("/auth/login"), 2000);
+    }
   };
 
   return (

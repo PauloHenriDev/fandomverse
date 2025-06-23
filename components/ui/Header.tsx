@@ -52,16 +52,14 @@ export default function Header() {
         </div>
       ) : (
         <div className="flex items-center gap-[15px]">
-          <Link href="/auth/login" passHref legacyBehavior>
+          <Link href="/auth/login">          
             <button className="h-[35px] w-[70px] rounded-[6px] bg-[#A98AF8] hover:bg-white hover:text-[#A98AF8] transition-colors">
-              <p>Entrar</p>
+              <p>Entrarr</p>
             </button>
           </Link>
-          <Link href="/auth/sign-up" passHref legacyBehavior>
-            <button className="h-[35px] w-[100px] rounded-[6px] bg-white hover:bg-[#A98AF8] transition-colors">
-              <p className="text-[#5047E5] hover:text-white">Cadastrar</p>
-            </button>
-          </Link>
+          <button className="h-[35px] w-[100px] rounded-[6px] bg-white hover:bg-[#A98AF8] transition-colors">
+            <p className="text-[#5047E5] hover:text-white">Cadastrar</p>
+          </button>
         </div>
       )}
     </div>
