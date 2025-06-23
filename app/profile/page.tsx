@@ -1,0 +1,201 @@
+'use client';
+
+import { useEffect, useState } from "react";
+import { supabase } from "../../lib/supabase";
+import { User } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+export default function ProfilePage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [nickname, setNickname] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    // Verifica se o usuário está logado
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        router.push("/auth/login");
+        return;
+      }
+      setUser(user);
+      // Carrega dados do perfil se existirem
+      loadProfile(user.id);
+    });
+  }, [router]);
+
+  const loadProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('nickname, avatar_url')
+      .eq('id', userId)
+      .single();
+
+    if (data) {
+      setNickname(data.nickname || "");
+      setAvatarUrl(data.avatar_url || "");
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setLoading(true);
+    setMessage("");
+
+    // Atualiza ou cria o perfil
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({
+        id: user.id,
+        nickname: nickname,
+        avatar_url: avatarUrl,
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) {
+      setMessage("Erro ao atualizar perfil: " + error.message);
+    } else {
+      setMessage("Perfil atualizado com sucesso!");
+    }
+    setLoading(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    setLoading(true);
+    setMessage("");
+    
+    try {
+      // Upload da imagem para o storage do Supabase
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Gera URL pública da imagem
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      setAvatarUrl(publicUrl);
+      setMessage("Foto atualizada com sucesso!");
+      
+    } catch (error: any) {
+      setMessage("Erro ao fazer upload da imagem: " + (error.message || "Erro desconhecido"));
+      console.error("Upload error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!user) {
+    return <div className="flex justify-center items-center h-screen">Carregando...</div>;
+  }
+
+  return (
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+      {/* Botão Voltar */}
+      <div className="mb-4">
+        <Link href="/" className="inline-flex items-center text-[#926DF6] hover:text-[#A98AF8] transition-colors">
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Voltar para Home
+        </Link>
+      </div>
+
+      <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Meu Perfil</h1>
+      
+      <form onSubmit={handleUpdateProfile} className="space-y-4">
+        {/* Avatar */}
+        <div className="text-center">
+          <div className="relative inline-block">
+            <img
+              src={avatarUrl || `https://ui-avatars.com/api/?name=${user.email}&size=100&background=926DF6&color=fff`}
+              alt="Avatar"
+              className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-[#926DF6]"
+            />
+            <label className="absolute bottom-0 right-0 bg-[#926DF6] text-white p-2 rounded-full cursor-pointer hover:bg-[#A98AF8] transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Email (somente leitura) */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+          <input
+            type="email"
+            value={user.email || ""}
+            disabled
+            className="w-full p-2 border border-gray-300 rounded bg-gray-50 text-gray-500"
+          />
+        </div>
+
+        {/* Nickname */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Nickname</label>
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="Digite seu nickname"
+            className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+          />
+        </div>
+
+        {/* Mensagem de feedback */}
+        {message && (
+          <div className={`p-3 rounded ${message.includes('Erro') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+            {message}
+          </div>
+        )}
+
+        {/* Botões */}
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-[#926DF6] text-white py-2 px-4 rounded hover:bg-[#A98AF8] transition-colors disabled:opacity-50"
+          >
+            {loading ? "Salvando..." : "Salvar Perfil"}
+          </button>
+          
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors"
+          >
+            Sair
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+} 
