@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { HeroSection, FilterSection, CardGrid, PageSection } from "@/components/templates";
+import { User } from "@supabase/supabase-js";
 
 // Interfaces para os dados da página
 interface FandomPage {
@@ -49,7 +50,7 @@ interface SectionItem {
   item_color: string;
   item_order: number;
   is_active: boolean;
-  custom_data: any;
+  custom_data: Record<string, unknown>;
 }
 
 interface Fandom {
@@ -71,10 +72,10 @@ interface Fandom {
  */
 export default function FandomPage() {
   const params = useParams();
-  const router = useRouter();
   const fandomId = params.id as string;
 
   // Estados para gerenciar dados da página
+  const [user, setUser] = useState<User | null>(null);
   const [fandom, setFandom] = useState<Fandom | null>(null);
   const [fandomPage, setFandomPage] = useState<FandomPage | null>(null);
   const [sections, setSections] = useState<FandomSection[]>([]);
@@ -97,6 +98,10 @@ export default function FandomPage() {
     try {
       setLoading(true);
       setError(null);
+
+      // Verifica se o usuário está logado
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
 
       // Carrega dados da fandom
       const { data: fandomData, error: fandomError } = await supabase
@@ -141,8 +146,9 @@ export default function FandomPage() {
         await loadSectionData(sectionsData || []);
       }
 
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      setError(errorMessage);
       console.error('Erro ao carregar página da fandom:', error);
     } finally {
       setLoading(false);
@@ -350,7 +356,18 @@ export default function FandomPage() {
               ← Voltar para Home
             </Link>
             <h1 className="text-xl font-semibold text-gray-800">{fandom.name}</h1>
-            <div className="w-20"></div> {/* Espaçador */}
+            {/* Botão de editar - só aparece para o criador */}
+            {user && user.id === fandom.creator_id && (
+              <Link
+                href={`/fandom/${fandomId}/edit`}
+                className="bg-[#926DF6] text-white px-4 py-2 rounded-lg hover:bg-[#A98AF8] transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Editar Página
+              </Link>
+            )}
           </div>
         </div>
       </div>
