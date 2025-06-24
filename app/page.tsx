@@ -1,32 +1,47 @@
+'use client';
+
 import Header from "@/components/ui/Header";
-import CharacterCard from "@/components/ui/CharacterCard";
-import { HeroSection, FilterSection, CardGrid, PageSection } from "@/components/templates";
-import FamdomCard from "@/components/ui/FamdomCard";
+// import CharacterCard from "@/components/ui/CharacterCard";
+// import { HeroSection, FilterSection, CardGrid, PageSection } from "@/components/templates";
+import { HeroSection } from "@/components/templates";
+
 
 export default function Home() {
   // Dados de exemplo para os filtros
-  const characterFilters = [
-    { id: "all", label: "Todos", isActive: true },
-    { id: "protagonists", label: "Protagonistas" },
-    { id: "antagonists", label: "Antagonistas" },
-    { id: "supporting", label: "Secundários" },
-    { id: "villains", label: "Vilões" },
-    { id: "heroes", label: "Heróis" },
-  ];
+  // const characterFilters = [
+  //   { id: "all", label: "Todos", isActive: true },
+  //   { id: "protagonists", label: "Protagonistas" },
+  //   { id: "antagonists", label: "Antagonistas" },
+  //   { id: "supporting", label: "Secundários" },
+  //   { id: "villains", label: "Vilões" },
+  //   { id: "heroes", label: "Heróis" },
+  // ];
 
-  const regionFilters = [
-    { id: "all", label: "Todas", isActive: true },
-    { id: "north", label: "Norte" },
-    { id: "south", label: "Sul" },
-    { id: "east", label: "Leste" },
-    { id: "west", label: "Oeste" },
-    { id: "center", label: "Centro" },
-  ];
+  // const regionFilters = [
+  //   { id: "all", label: "Todas", isActive: true },
+  //   { id: "north", label: "Norte" },
+  //   { id: "south", label: "Sul" },
+  //   { id: "east", label: "Leste" },
+  //   { id: "west", label: "Oeste" },
+  //   { id: "center", label: "Centro" },
+  // ];
 
   return (
     <main className="bg-[#875CF5]">
       <Header />
-      <div className="flex flex-col items-center mt-[20px]">
+      <HeroSection 
+        title="Nome da Fandom"
+        description="Breve Descrição"
+        primaryButtonText="Explorar Conteúdo"
+        secondaryButtonText="Entrar na Comunidade"
+        onPrimaryClick={() => console.log("Explorar clicado")}
+        onSecondaryClick={() => console.log("Comunidade clicado")}
+      />
+
+
+
+      
+      {/* <div className="flex flex-col items-center mt-[20px]">
         <h1 className="text-[50px] text-white font-bold">Escolha sua Fandom</h1>
         <p className="text-[20px] text-[#E3DBFC] mt-[10px]">Explore comunidades dedicadas aos seus universos favoritos. Conecte-se com outros fãs, compartilhe teorias e celebre suas paixões.</p>
       </div>
@@ -35,7 +50,7 @@ export default function Home() {
         <div className="flex flex-wrap gap-[20px]">
           <FamdomCard />
         </div>
-      </div>
+      </div> */}
 
 
       {/* Hero Section */}
