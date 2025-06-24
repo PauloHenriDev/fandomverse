@@ -26,10 +26,12 @@ export default function Home() {
           
           {/* Botões */}
           <div className="bg-blue-500 p-[5px] rounded-[10px] mt-[15px] overflow-hidden w-fit max-w-full">
-            <div className="flex text-[15px] overflow-x-scroll gap-[10px]">
+            <div className="flex text-[15px] overflow-x-auto gap-[10px]">
               <button className="bg-red-500 pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[10px] whitespace-nowrap">Botão 1</button>
               <button className="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[10px] hover:bg-red-500 transition-all duration-250 whitespace-nowrap">Botão 2</button>
               <button className="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[10px] hover:bg-red-500 transition-all duration-250 whitespace-nowrap">Botão 3</button>
+
+
 
 
 
