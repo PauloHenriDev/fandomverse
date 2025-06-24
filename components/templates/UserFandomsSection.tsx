@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import Link from 'next/link';
 
 // Interface que define a estrutura de uma fandom
 interface Fandom {
@@ -27,6 +28,7 @@ interface UserFandomsSectionProps {
  * - Mostra estado vazio quando não há fandoms
  * - Permite criar, editar e excluir fandoms
  * - Inclui loading state durante carregamento
+ * - Permite visualizar a página personalizada da fandom
  */
 export default function UserFandomsSection({
   fandoms,
@@ -87,6 +89,17 @@ export default function UserFandomsSection({
               <div className="flex justify-between items-start mb-3">
                 <h3 className="font-semibold text-gray-800 truncate">{fandom.name}</h3>
                 <div className="flex gap-1">
+                  {/* Botão de visualizar página */}
+                  <Link
+                    href={`/fandom/${fandom.id}`}
+                    className="text-green-600 hover:text-green-800 p-1"
+                    title="Ver Página"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </Link>
                   {/* Botão de editar */}
                   <button
                     onClick={() => onEditFandom?.(fandom.id)}

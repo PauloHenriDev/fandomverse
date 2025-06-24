@@ -192,7 +192,7 @@ export default function ProfilePage() {
    * @param fandomId - ID da fandom a ser editada
    */
   const handleEditFandom = (fandomId: string) => {
-    router.push(`/edit-fandom/${fandomId}`);
+    router.push(`/fandom/${fandomId}/edit`);
   };
 
   /**

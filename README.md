@@ -1,105 +1,184 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# 🎭 Sistema de Fandoms Personalizáveis
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+Um sistema completo para criar e gerenciar fandoms com páginas personalizáveis, construído com Next.js 13, Tailwind CSS e Supabase.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+## ✨ Funcionalidades Principais
 
-## Features
+### 🏠 **Página Principal**
+- Hero section com design moderno
+- Seção de filtros para navegação
+- Grid responsivo de cards
+- Sistema de autenticação integrado
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+### 👤 **Sistema de Usuários**
+- Registro e login de usuários
+- Perfil personalizável com avatar
+- Gerenciamento de fandoms criadas
+- Upload de imagens para avatar
 
-## Demo
+### 🎨 **Criação de Fandoms**
+- Formulário intuitivo para criar fandoms
+- Upload de imagem da fandom (opcional)
+- Criação automática de página personalizada
+- Redirecionamento para a página da fandom
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+### 🌟 **Páginas Personalizáveis**
+- **URLs dinâmicas**: `/fandom/[id]`
+- **Seções customizáveis**: Hero, Filtros, Cards, Conteúdo personalizado
+- **Sistema de cores**: Personalização completa de cores
+- **Ordem das seções**: Reordenação drag-and-drop
+- **Conteúdo dinâmico**: Filtros e itens personalizáveis
 
-## Deploy to Vercel
+### ⚙️ **Editor de Páginas**
+- Interface de edição intuitiva
+- Personalização de cores em tempo real
+- Reordenação de seções
+- Preview das alterações
+- Acesso restrito ao criador da fandom
 
-Vercel deployment will guide you through creating a Supabase account and project.
+## 🗄️ Estrutura do Banco de Dados
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+### Tabelas Principais
+- **`fandoms`**: Informações básicas das fandoms
+- **`fandom_pages`**: Configurações das páginas personalizadas
+- **`fandom_sections`**: Seções de cada página
+- **`section_filters`**: Filtros das seções
+- **`section_items`**: Itens (cards) das seções
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+### Segurança
+- Row Level Security (RLS) habilitado
+- Políticas de acesso baseadas em usuário
+- Apenas criadores podem editar suas fandoms
+- Páginas públicas para visualização
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+## 🚀 Como Usar
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+### 1. **Configuração Inicial**
+```bash
+# Instalar dependências
+npm install
 
-## Clone and run locally
+# Configurar variáveis de ambiente
+cp .env.example .env.local
+# Adicionar suas credenciais do Supabase
+```
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+### 2. **Configurar Banco de Dados**
+Execute os scripts SQL na ordem:
+1. `database/fandoms_table.sql` - Tabela básica de fandoms
+2. `database/fandom_pages_table.sql` - Sistema de páginas personalizáveis
 
-2. Create a Next.js app using the Supabase Starter template npx command
+### 3. **Executar o Projeto**
+```bash
+npm run dev
+```
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+### 4. **Fluxo de Uso**
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+#### **Criar uma Fandom**
+1. Faça login na aplicação
+2. Vá para "Meu Perfil"
+3. Clique em "Criar Nova Fandom"
+4. Preencha as informações
+5. A página personalizada será criada automaticamente
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+#### **Personalizar a Página**
+1. Na página da fandom, clique em "Editar"
+2. Modifique cores, textos e seções
+3. Reordene as seções conforme desejado
+4. Salve as alterações
 
-3. Use `cd` to change into the app's directory
+#### **Visualizar a Página**
+- Acesse `/fandom/[id]` para ver a página pública
+- A página é responsiva e otimizada para SEO
 
-   ```bash
-   cd with-supabase-app
-   ```
+## 🎨 Templates Disponíveis
 
-4. Rename `.env.example` to `.env.local` and update the following:
+### **HeroSection**
+- Título e descrição personalizáveis
+- Botões com cores customizáveis
+- Design responsivo
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+### **FilterSection**
+- Filtros dinâmicos
+- Botão "Ver mais"
+- Integração com cards
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+### **CardGrid**
+- Grid responsivo de cards
+- Cores personalizáveis por item
+- Suporte a imagens
 
-5. You can now run the Next.js local development server:
+### **PageSection**
+- Container para seções
+- Espaçamento consistente
+- Flexibilidade de conteúdo
 
-   ```bash
-   npm run dev
-   ```
+## 🔧 Tecnologias Utilizadas
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+- **Frontend**: Next.js 13, React, TypeScript
+- **Styling**: Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **Deploy**: Vercel (recomendado)
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+## 📁 Estrutura do Projeto
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+```
+tutorial/
+├── app/                    # Páginas Next.js 13
+│   ├── auth/              # Autenticação
+│   ├── create-fandom/     # Criação de fandoms
+│   ├── fandom/[id]/       # Páginas dinâmicas
+│   │   └── edit/          # Editor de páginas
+│   ├── profile/           # Perfil do usuário
+│   └── page.tsx           # Página principal
+├── components/            # Componentes React
+│   ├── templates/         # Templates reutilizáveis
+│   └── ui/               # Componentes de UI
+├── database/             # Scripts SQL
+├── lib/                  # Configurações e utilitários
+│   └── supabase/         # Cliente Supabase
+└── README.md            # Documentação
+```
 
-## Feedback and issues
+## 🎯 Próximos Passos
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+### Funcionalidades Planejadas
+- [ ] Editor visual drag-and-drop
+- [ ] Mais tipos de seções (galeria, timeline, etc.)
+- [ ] Sistema de comentários
+- [ ] Compartilhamento em redes sociais
+- [ ] Analytics de páginas
+- [ ] Temas predefinidos
+- [ ] Sistema de moderação
 
-## More Supabase examples
+### Melhorias Técnicas
+- [ ] Cache otimizado
+- [ ] PWA (Progressive Web App)
+- [ ] SEO avançado
+- [ ] Testes automatizados
+- [ ] CI/CD pipeline
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+## 🤝 Contribuição
+
+1. Fork o projeto
+2. Crie uma branch para sua feature
+3. Commit suas mudanças
+4. Push para a branch
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+
+## 🆘 Suporte
+
+Se você encontrar algum problema ou tiver dúvidas:
+
+1. Verifique a documentação do Supabase
+2. Consulte os logs do console
+3. Abra uma issue no repositório
+
+---
+
+**Desenvolvido com ❤️ usando Next.js e Supabase**

@@ -13,7 +13,8 @@ import Link from "next/link";
  * - Preencham informações básicas da fandom
  * - Façam upload de imagem (opcional)
  * - Criem uma nova fandom no banco de dados
- * - Sejam redirecionados de volta ao perfil após criação
+ * - Criem automaticamente uma página personalizada
+ * - Sejam redirecionados para a página da fandom após criação
  */
 export default function CreateFandomPage() {
   // Estados para gerenciar autenticação e dados do formulário
@@ -56,7 +57,7 @@ export default function CreateFandomPage() {
 
     try {
       // Insere nova fandom no banco de dados
-      const { error } = await supabase
+      const { data: fandomData, error: fandomError } = await supabase
         .from('fandoms')
         .insert({
           name: formData.name,
@@ -64,16 +65,34 @@ export default function CreateFandomPage() {
           image_url: formData.image_url || null, // Converte string vazia para null
           creator_id: user.id,
           created_at: new Date().toISOString()
-        });
+        })
+        .select()
+        .single();
 
-      if (error) {
-        throw error;
+      if (fandomError) {
+        throw fandomError;
       }
 
-      // Sucesso - mostra mensagem e redireciona
-      setMessage("Fandom criada com sucesso!");
+      // Cria automaticamente uma página personalizada para a fandom
+      const { data: pageData, error: pageError } = await supabase
+        .rpc('create_default_fandom_page', {
+          fandom_uuid: fandomData.id
+        });
+
+      if (pageError) {
+        console.error('Erro ao criar página da fandom:', pageError);
+        // Mesmo com erro na página, a fandom foi criada
+        setMessage("Fandom criada com sucesso! (Erro ao criar página personalizada)");
+        setTimeout(() => {
+          router.push("/profile");
+        }, 2000);
+        return;
+      }
+
+      // Sucesso - mostra mensagem e redireciona para a página da fandom
+      setMessage("Fandom criada com sucesso! Redirecionando para sua página...");
       setTimeout(() => {
-        router.push("/profile");
+        router.push(`/fandom/${fandomData.id}`);
       }, 2000);
     } catch (error: any) {
       // Erro - mostra mensagem de erro
@@ -115,6 +134,22 @@ export default function CreateFandomPage() {
       {/* Container principal do formulário */}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Criar Nova Fandom</h1>
+        
+        {/* Informação sobre a página personalizada */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div>
+              <h3 className="text-sm font-medium text-blue-800 mb-1">Página Personalizada</h3>
+              <p className="text-sm text-blue-700">
+                Após criar sua fandom, uma página personalizada será criada automaticamente com seções editáveis, 
+                cores customizáveis e templates prontos para usar.
+              </p>
+            </div>
+          </div>
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Campo: Nome da Fandom (obrigatório) */}
