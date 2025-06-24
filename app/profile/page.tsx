@@ -196,7 +196,7 @@ export default function ProfilePage() {
             onClick={handleLogout}
             className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors"
           >
-            Sair
+            Logout
           </button>
         </div>
       </form>
