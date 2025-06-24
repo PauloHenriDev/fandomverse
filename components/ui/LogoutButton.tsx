@@ -10,7 +10,7 @@ export default function LogoutButton() {
 
   return (
     <button onClick={handleLogout} className="bg-red-500 text-white rounded p-2">
-      Sair
+      Logout
     </button>
   );
 }

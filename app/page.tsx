@@ -7,9 +7,9 @@ export default function Home() {
       <Header />
       <div className="flex flex-col items-center mt-[20px]">
         <h1 className="text-[50px] text-white font-bold">Escolha sua Fandom</h1>
-        <p className="text-[20px] text-[#E3DBFC]">Explore comunidades dedicadas aos seus universos favoritos. Conecte-se com outros fãs, compartilhe teorias e celebre suas paixões.</p>
+        <p className="text-[20px] text-[#E3DBFC] mt-[10px]">Explore comunidades dedicadas aos seus universos favoritos. Conecte-se com outros fãs, compartilhe teorias e celebre suas paixões.</p>
       </div>
-      <div className="flex flex-col items-center pl-[150px] pr-[150px]">
+      <div className="flex flex-col items-center pl-[150px] pr-[150px] mt-[20px]">
         <p>search bar</p>
         <div className="flex flex-wrap gap-[20px]">
           <FamdomCard />
