@@ -1,4 +1,5 @@
 import Header from "@/components/ui/Header";
+import CharacterCard from "@/components/ui/CharacterCard";
 
 export default function Home() {
   return (
@@ -30,17 +31,19 @@ export default function Home() {
               <button className="bg-red-500 pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[10px] whitespace-nowrap">Botão 1</button>
               <button className="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[10px] hover:bg-red-500 transition-all duration-250 whitespace-nowrap">Botão 2</button>
               <button className="pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[10px] hover:bg-red-500 transition-all duration-250 whitespace-nowrap">Botão 3</button>
-
-
-
-
-
             </div>
           </div>
+
+          {/* Cards */}
+          <div className="flex mt-[10px] gap-[20px] flex-wrap">
+            <CharacterCard />
+          </div>
+
+
+
+
         </div>
-        <div>
-          <h2>Regiões</h2>
-        </div>
+
 
         
       </div>
