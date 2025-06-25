@@ -33,7 +33,7 @@ export default function Home() {
   }
 
   return (
-    <main className="bg-[#875CF5]">
+    <main className="bg-[#875CF5] min-h-screen">
       <Header />
       <div className="flex flex-col items-center mt-[20px]">
         <h1 className="text-[50px] text-white font-bold">Escolha sua Fandom</h1>
