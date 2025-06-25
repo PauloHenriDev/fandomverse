@@ -74,7 +74,7 @@ export default function CreateFandomPage() {
       }
 
       // Cria automaticamente uma página personalizada para a fandom
-      const { data: pageData, error: pageError } = await supabase
+      const { error: pageError } = await supabase
         .rpc('create_default_fandom_page', {
           fandom_uuid: fandomData.id
         });
@@ -94,9 +94,10 @@ export default function CreateFandomPage() {
       setTimeout(() => {
         router.push(`/fandom/${fandomData.id}`);
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Erro - mostra mensagem de erro
-      setMessage("Erro ao criar fandom: " + error.message);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      setMessage("Erro ao criar fandom: " + errorMessage);
     } finally {
       setLoading(false);
     }

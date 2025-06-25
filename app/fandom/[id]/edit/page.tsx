@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { User } from "@supabase/supabase-js";
 
 // Interfaces para os dados
 interface FandomPage {
@@ -55,7 +54,6 @@ export default function EditFandomPage() {
   const fandomId = params.id as string;
 
   // Estados para gerenciar dados
-  const [user, setUser] = useState<User | null>(null);
   const [fandom, setFandom] = useState<Fandom | null>(null);
   const [fandomPage, setFandomPage] = useState<FandomPage | null>(null);
   const [sections, setSections] = useState<FandomSection[]>([]);
@@ -77,14 +75,7 @@ export default function EditFandomPage() {
   });
 
   // Hook que executa quando o componente é montado
-  useEffect(() => {
-    checkAuthAndLoadData();
-  }, [fandomId]);
-
-  /**
-   * Verifica autenticação e carrega dados
-   */
-  const checkAuthAndLoadData = async () => {
+  const checkAuthAndLoadData = useCallback(async () => {
     try {
       // Verifica se o usuário está logado
       const { data: { user } } = await supabase.auth.getUser();
@@ -92,7 +83,6 @@ export default function EditFandomPage() {
         router.push("/auth/login");
         return;
       }
-      setUser(user);
 
       // Carrega dados da fandom
       const { data: fandomData, error: fandomError } = await supabase
@@ -150,13 +140,17 @@ export default function EditFandomPage() {
         setSections(sectionsData || []);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao carregar dados:', error);
       router.push("/");
     } finally {
       setLoading(false);
     }
-  };
+  }, [fandomId, router]);
+
+  useEffect(() => {
+    checkAuthAndLoadData();
+  }, [fandomId, checkAuthAndLoadData]);
 
   /**
    * Salva as alterações da página
@@ -181,8 +175,9 @@ export default function EditFandomPage() {
       setTimeout(() => {
         router.push(`/fandom/${fandomId}`);
       }, 2000);
-    } catch (error: any) {
-      setMessage("Erro ao salvar: " + error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      setMessage("Erro ao salvar: " + errorMessage);
     } finally {
       setSaving(false);
     }

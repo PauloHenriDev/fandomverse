@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../../lib/supabase";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { HeroSection, FilterSection, CardGrid, PageSection } from "@/components/templates";
 import { User } from "@supabase/supabase-js";
+import Image from "next/image";
 
 // Interfaces para os dados da página
 interface FandomPage {
@@ -84,17 +85,10 @@ export default function FandomPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Hook que executa quando o componente é montado
-  useEffect(() => {
-    if (fandomId) {
-      loadFandomPage();
-    }
-  }, [fandomId]);
-
   /**
    * Carrega todos os dados da página da fandom
    */
-  const loadFandomPage = async () => {
+  const loadFandomPage = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -153,7 +147,14 @@ export default function FandomPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fandomId]);
+
+  // Hook que executa quando o componente é montado
+  useEffect(() => {
+    if (fandomId) {
+      loadFandomPage();
+    }
+  }, [fandomId, loadFandomPage]);
 
   /**
    * Carrega filtros e itens para cada seção
@@ -240,9 +241,11 @@ export default function FandomPage() {
                     <h3 className="font-semibold text-gray-800 mb-2">{item.item_title}</h3>
                     <p className="text-gray-600 text-sm">{item.item_description}</p>
                     {item.item_image_url && (
-                      <img 
+                      <Image 
                         src={item.item_image_url} 
                         alt={item.item_title}
+                        width={400}
+                        height={128}
                         className="w-full h-32 object-cover rounded mt-2"
                       />
                     )}
@@ -271,9 +274,11 @@ export default function FandomPage() {
                   <h3 className="font-semibold text-gray-800 mb-2">{item.item_title}</h3>
                   <p className="text-gray-600 text-sm">{item.item_description}</p>
                   {item.item_image_url && (
-                    <img 
+                    <Image 
                       src={item.item_image_url} 
                       alt={item.item_title}
+                      width={400}
+                      height={128}
                       className="w-full h-32 object-cover rounded mt-2"
                     />
                   )}
