@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../../lib/supabase";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { HeroSection, FilterSection, CardGrid, PageSection } from "@/components/templates";
+import { HeroSection, FilterSection, PageSection } from "@/components/templates";
+import CharacterCard from "@/components/ui/CharacterCard";
 import { User } from "@supabase/supabase-js";
 import Image from "next/image";
 
@@ -35,6 +36,7 @@ interface FandomSection {
 
 interface SectionFilter {
   id: string;
+  section_id: string;
   filter_label: string;
   filter_value: string;
   is_active: boolean;
@@ -44,6 +46,7 @@ interface SectionFilter {
 
 interface SectionItem {
   id: string;
+  section_id: string;
   item_type: string;
   item_title: string;
   item_description: string;
@@ -51,7 +54,6 @@ interface SectionItem {
   item_color: string;
   item_order: number;
   is_active: boolean;
-  custom_data: Record<string, unknown>;
 }
 
 interface Fandom {
@@ -70,9 +72,12 @@ interface Fandom {
  * - Renderiza seções baseadas nos templates
  * - Permite customização de cores e conteúdo
  * - É acessível publicamente
+ * - Exibe personagens usando CharacterCard
+ * - Layout totalmente responsivo
  */
 export default function FandomPage() {
   const params = useParams();
+  const router = useRouter();
   const fandomId = params.id as string;
 
   // Estados para gerenciar dados da página
@@ -85,15 +90,10 @@ export default function FandomPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Carrega todos os dados da página da fandom
-   */
-  const loadFandomPage = useCallback(async () => {
+  // Hook que executa quando o componente é montado
+  const loadPageData = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
-
-      // Verifica se o usuário está logado
+      // Verifica se o usuário está logado (opcional)
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
 
@@ -110,7 +110,7 @@ export default function FandomPage() {
 
       setFandom(fandomData);
 
-      // Carrega dados da página da fandom
+      // Carrega dados da página personalizada
       const { data: pageData, error: pageError } = await supabase
         .from('fandom_pages')
         .select('*')
@@ -135,62 +135,51 @@ export default function FandomPage() {
         console.error('Erro ao carregar seções:', sectionsError);
       } else {
         setSections(sectionsData || []);
-        
+
         // Carrega filtros e itens para cada seção
-        await loadSectionData(sectionsData || []);
+        const filtersData: { [sectionId: string]: SectionFilter[] } = {};
+        const itemsData: { [sectionId: string]: SectionItem[] } = {};
+
+        for (const section of sectionsData || []) {
+          // Carrega filtros da seção
+          const { data: filters, error: filtersError } = await supabase
+            .from('section_filters')
+            .select('*')
+            .eq('section_id', section.id)
+            .order('filter_order');
+
+          if (!filtersError) {
+            filtersData[section.id] = filters || [];
+          }
+
+          // Carrega itens da seção
+          const { data: items, error: itemsError } = await supabase
+            .from('section_items')
+            .select('*')
+            .eq('section_id', section.id)
+            .eq('is_active', true)
+            .order('item_order');
+
+          if (!itemsError) {
+            itemsData[section.id] = items || [];
+          }
+        }
+
+        setFilters(filtersData);
+        setItems(itemsData);
       }
 
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      setError(errorMessage);
-      console.error('Erro ao carregar página da fandom:', error);
+      console.error('Erro ao carregar dados:', error);
+      setError(error instanceof Error ? error.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
   }, [fandomId]);
 
-  // Hook que executa quando o componente é montado
   useEffect(() => {
-    if (fandomId) {
-      loadFandomPage();
-    }
-  }, [fandomId, loadFandomPage]);
-
-  /**
-   * Carrega filtros e itens para cada seção
-   */
-  const loadSectionData = async (sectionsData: FandomSection[]) => {
-    const filtersData: { [sectionId: string]: SectionFilter[] } = {};
-    const itemsData: { [sectionId: string]: SectionItem[] } = {};
-
-    for (const section of sectionsData) {
-      // Carrega filtros da seção
-      const { data: sectionFilters } = await supabase
-        .from('section_filters')
-        .select('*')
-        .eq('section_id', section.id)
-        .order('filter_order');
-
-      if (sectionFilters) {
-        filtersData[section.id] = sectionFilters;
-      }
-
-      // Carrega itens da seção
-      const { data: sectionItems } = await supabase
-        .from('section_items')
-        .select('*')
-        .eq('section_id', section.id)
-        .eq('is_active', true)
-        .order('item_order');
-
-      if (sectionItems) {
-        itemsData[section.id] = sectionItems;
-      }
-    }
-
-    setFilters(filtersData);
-    setItems(itemsData);
-  };
+    loadPageData();
+  }, [loadPageData]);
 
   /**
    * Renderiza uma seção baseada no seu tipo
@@ -204,10 +193,10 @@ export default function FandomPage() {
         return (
           <HeroSection
             key={section.id}
-            title={fandomPage?.hero_title || section.section_title || "Bem-vindo"}
-            description={fandomPage?.hero_description || section.section_description || ""}
+            title={fandomPage?.hero_title || "Bem-vindo"}
+            description={fandomPage?.hero_description || ""}
             primaryButtonText={fandomPage?.hero_primary_button_text || "Explorar"}
-            secondaryButtonText={fandomPage?.hero_secondary_button_text || "Comunidade"}
+            secondaryButtonText={fandomPage?.hero_secondary_button_text || "Saiba Mais"}
             onPrimaryClick={() => console.log("Botão primário clicado")}
             onSecondaryClick={() => console.log("Botão secundário clicado")}
           />
@@ -227,84 +216,75 @@ export default function FandomPage() {
               onFilterChange={(filterId) => console.log("Filtro alterado:", filterId)}
               showLoadMore={true}
               loadMoreText={`Ver mais ${section.section_title}`}
-              onLoadMore={() => console.log("Ver mais")}
+              onLoadMore={() => {
+                if (section.section_title === 'Personagens') {
+                  router.push(`/fandom/${fandomId}/characters`);
+                } else {
+                  console.log("Ver mais");
+                }
+              }}
             />
             
-            {sectionItems.length > 0 && (
-              <CardGrid>
+            {/* Renderiza personagens se for seção de personagens */}
+            {section.section_title === 'Personagens' && sectionItems.length > 0 && (
+              <div className="mt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                  {sectionItems.map(item => (
+                    <div key={item.id} className="flex justify-center">
+                      <CharacterCard
+                        id={item.id}
+                        title={item.item_title}
+                        description={item.item_description}
+                        image_url={item.item_image_url}
+                        color={item.item_color}
+                        isEditable={user?.id === fandom?.creator_id}
+                        fandomId={fandomId}
+                        showViewMoreButton={true}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Renderiza outros itens como cards genéricos */}
+            {section.section_title !== 'Personagens' && sectionItems.length > 0 && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
                 {sectionItems.map(item => (
                   <div
                     key={item.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
                     style={{ borderColor: item.item_color }}
                   >
-                    <h3 className="font-semibold text-gray-800 mb-2">{item.item_title}</h3>
-                    <p className="text-gray-600 text-sm">{item.item_description}</p>
+                    <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">{item.item_title}</h3>
+                    <p className="text-gray-600 text-xs sm:text-sm line-clamp-3">{item.item_description}</p>
                     {item.item_image_url && (
-                      <Image 
-                        src={item.item_image_url} 
-                        alt={item.item_title}
-                        width={400}
-                        height={128}
-                        className="w-full h-32 object-cover rounded mt-2"
-                      />
+                      <div className="mt-3">
+                        <Image 
+                          src={item.item_image_url} 
+                          alt={item.item_title}
+                          width={400}
+                          height={128}
+                          className="w-full h-24 sm:h-32 object-cover rounded"
+                        />
+                      </div>
                     )}
                   </div>
                 ))}
-              </CardGrid>
+              </div>
             )}
           </PageSection>
         );
 
-      case 'card_grid':
-        return (
-          <PageSection key={section.id}>
-            <div>
-              <h2 className="text-[40px] font-bold">{section.section_title}</h2>
-              <p className="text-[20px] mt-[10px]">{section.section_description}</p>
-            </div>
-            
-            <CardGrid>
-              {sectionItems.map(item => (
-                <div
-                  key={item.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                  style={{ borderColor: item.item_color }}
-                >
-                  <h3 className="font-semibold text-gray-800 mb-2">{item.item_title}</h3>
-                  <p className="text-gray-600 text-sm">{item.item_description}</p>
-                  {item.item_image_url && (
-                    <Image 
-                      src={item.item_image_url} 
-                      alt={item.item_title}
-                      width={400}
-                      height={128}
-                      className="w-full h-32 object-cover rounded mt-2"
-                    />
-                  )}
-                </div>
-              ))}
-            </CardGrid>
-          </PageSection>
-        );
-
-      case 'custom':
-        return (
-          <PageSection key={section.id}>
-            <div>
-              <h2 className="text-[40px] font-bold">{section.section_title}</h2>
-              <p className="text-[20px] mt-[10px]">{section.section_description}</p>
-            </div>
-            
-            <div 
-              className="mt-4"
-              dangerouslySetInnerHTML={{ __html: section.custom_content || "" }}
-            />
-          </PageSection>
-        );
-
       default:
-        return null;
+        return (
+          <PageSection key={section.id}>
+            <div className="text-center py-8 px-4">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-4">{section.section_title}</h2>
+              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto">{section.section_description}</p>
+            </div>
+          </PageSection>
+        );
     }
   };
 
@@ -312,20 +292,20 @@ export default function FandomPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#926DF6]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-[#926DF6]"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-2xl mx-auto mt-10 p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <h1 className="text-2xl font-bold text-red-800 mb-4">Erro</h1>
-          <p className="text-red-700 mb-4">{error}</p>
+      <div className="max-w-2xl mx-auto mt-10 p-4 sm:p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6 text-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-red-800 mb-4">Erro</h1>
+          <p className="text-sm sm:text-base text-red-700 mb-4">{error}</p>
           <Link
             href="/"
-            className="bg-[#926DF6] text-white px-6 py-2 rounded-lg hover:bg-[#A98AF8] transition-colors"
+            className="bg-[#926DF6] text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-[#A98AF8] transition-colors text-sm sm:text-base"
           >
             Voltar para Home
           </Link>
@@ -336,13 +316,13 @@ export default function FandomPage() {
 
   if (!fandom || !fandomPage) {
     return (
-      <div className="max-w-2xl mx-auto mt-10 p-6">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-          <h1 className="text-2xl font-bold text-yellow-800 mb-4">Página não encontrada</h1>
-          <p className="text-yellow-700 mb-4">Esta fandom não possui uma página personalizada.</p>
+      <div className="max-w-2xl mx-auto mt-10 p-4 sm:p-6">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 sm:p-6 text-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-yellow-800 mb-4">Página não encontrada</h1>
+          <p className="text-sm sm:text-base text-yellow-700 mb-4">Esta fandom não possui uma página personalizada.</p>
           <Link
             href="/"
-            className="bg-[#926DF6] text-white px-6 py-2 rounded-lg hover:bg-[#A98AF8] transition-colors"
+            className="bg-[#926DF6] text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-[#A98AF8] transition-colors text-sm sm:text-base"
           >
             Voltar para Home
           </Link>
@@ -352,24 +332,24 @@ export default function FandomPage() {
   }
 
   return (
-    <main style={{ backgroundColor: fandomPage.background_color }}>
-      {/* Header simples */}
+    <div 
+      className="min-h-screen"
+      style={{ backgroundColor: fandomPage.background_color }}
+    >
+      {/* Header com botão de edição para o criador */}
       <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <Link href="/" className="text-[#926DF6] hover:text-[#A98AF8] transition-colors">
-              ← Voltar para Home
-            </Link>
-            <h1 className="text-xl font-semibold text-gray-800">{fandom.name}</h1>
-            {/* Botão de editar - só aparece para o criador */}
-            {user && user.id === fandom.creator_id && (
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{fandom.name}</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1 line-clamp-2">{fandom.description}</p>
+            </div>
+            
+            {user?.id === fandom.creator_id && (
               <Link
                 href={`/fandom/${fandomId}/edit`}
-                className="bg-[#926DF6] text-white px-4 py-2 rounded-lg hover:bg-[#A98AF8] transition-colors flex items-center gap-2"
+                className="bg-[#926DF6] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-[#A98AF8] transition-colors text-sm sm:text-base whitespace-nowrap flex-shrink-0"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
                 Editar Página
               </Link>
             )}
@@ -377,17 +357,12 @@ export default function FandomPage() {
         </div>
       </div>
 
-      {/* Renderiza todas as seções em ordem */}
-      {sections.map(section => renderSection(section))}
-
-      {/* Footer simples */}
-      <div className="bg-white border-t border-gray-200 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center text-gray-600">
-            <p>© 2024 {fandom.name} - Página personalizada</p>
-          </div>
+      {/* Conteúdo da página */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="space-y-8 sm:space-y-12">
+          {sections.map(section => renderSection(section))}
         </div>
       </div>
-    </main>
+    </div>
   );
 } 
