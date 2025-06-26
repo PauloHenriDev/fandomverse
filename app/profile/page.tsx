@@ -23,8 +23,16 @@ interface ProfileSettings {
   headerColor: string;
   headerImage?: string;
   backgroundColor: string;
+  backgroundImage?: string;
   aboutBackgroundColor: string;
   textColor: string;
+  nicknameColor: string;
+  aboutTitleColor: string;
+  aboutTextColor: string;
+  buttonBackgroundColor: string;
+  buttonTextColor: string;
+  buttonHoverBackgroundColor: string;
+  buttonHoverTextColor: string;
   about: string;
 }
 
@@ -56,9 +64,32 @@ export default function ProfilePage() {
     backgroundColor: "#ffffff",
     aboutBackgroundColor: "#ef4444", // red-500
     textColor: "#000000",
+    nicknameColor: "#000000",
+    aboutTitleColor: "#000000",
+    aboutTextColor: "#000000",
+    buttonBackgroundColor: "#ffffff",
+    buttonTextColor: "#000000",
+    buttonHoverBackgroundColor: "#f3f4f6",
+    buttonHoverTextColor: "#000000",
     about: ""
   });
   
+  // Cores padrão para reset
+  const defaultColors: ProfileSettings = {
+    headerColor: "#f97316", // orange-500
+    backgroundColor: "#ffffff",
+    aboutBackgroundColor: "#ef4444", // red-500
+    textColor: "#000000",
+    nicknameColor: "#000000",
+    aboutTitleColor: "#000000",
+    aboutTextColor: "#000000",
+    buttonBackgroundColor: "#ffffff",
+    buttonTextColor: "#000000",
+    buttonHoverBackgroundColor: "#f3f4f6",
+    buttonHoverTextColor: "#000000",
+    about: ""
+  };
+
   const router = useRouter();
 
   // Hook que executa quando o componente é montado
@@ -306,6 +337,47 @@ export default function ProfilePage() {
   };
 
   /**
+   * Faz upload de uma imagem de fundo para o perfil
+   * @param e - Evento de mudança do input de arquivo
+   */
+  const handleBackgroundImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      // Gera nome único para o arquivo
+      const fileExt = file.name.split('.').pop();
+      const fileName = `background-${user.id}-${Date.now()}.${fileExt}`;
+      
+      // Upload da imagem para o storage do Supabase
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Gera URL pública da imagem
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      setProfileSettings(prev => ({
+        ...prev,
+        backgroundImage: publicUrl
+      }));
+      
+      setMessage("Imagem de fundo atualizada com sucesso!");
+      
+    } catch (error: unknown) {
+      console.error("Background upload error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+      setMessage("Erro ao fazer upload da imagem de fundo: " + errorMessage);
+    }
+  };
+
+  /**
    * Redireciona para a página de criação de nova fandom
    */
   const handleCreateNewFandom = () => {
@@ -318,6 +390,27 @@ export default function ProfilePage() {
    */
   const handleEditFandom = (fandomId: string) => {
     router.push(`/fandom/${fandomId}/edit`);
+  };
+
+  /**
+   * Reseta as cores para os valores padrão
+   */
+  const handleResetColors = () => {
+    setProfileSettings(prev => ({
+      ...prev,
+      headerColor: defaultColors.headerColor,
+      backgroundColor: defaultColors.backgroundColor,
+      aboutBackgroundColor: defaultColors.aboutBackgroundColor,
+      textColor: defaultColors.textColor,
+      nicknameColor: defaultColors.nicknameColor,
+      aboutTitleColor: defaultColors.aboutTitleColor,
+      aboutTextColor: defaultColors.aboutTextColor,
+      buttonBackgroundColor: defaultColors.buttonBackgroundColor,
+      buttonTextColor: defaultColors.buttonTextColor,
+      buttonHoverBackgroundColor: defaultColors.buttonHoverBackgroundColor,
+      buttonHoverTextColor: defaultColors.buttonHoverTextColor
+    }));
+    setMessage("Cores resetadas para o padrão!");
   };
 
   /**
@@ -359,7 +452,16 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="" style={{ backgroundColor: profileSettings.backgroundColor }}>
+    <div 
+      className="" 
+      style={{ 
+        backgroundColor: profileSettings.backgroundColor,
+        backgroundImage: profileSettings.backgroundImage ? `url(${profileSettings.backgroundImage})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       <Header />
       {/* Botão de navegação para voltar à home */}
       <div className="">
@@ -410,7 +512,7 @@ export default function ProfilePage() {
 
             {/* Nome */}
             <div className="ml-[30px]">
-              <p className="text-[40px] font-bold" style={{ color: profileSettings.textColor }}>
+              <p className="text-[40px] font-bold" style={{ color: profileSettings.nicknameColor }}>
                 {nickname || "Apelido"}
               </p>
             </div>
@@ -459,13 +561,125 @@ export default function ProfilePage() {
 
       {/* Seção de Buttons */}
       <div className="flex gap-[10px] pl-[100px] pr-[100px] pt-[25px] pb-[10px] border-b border-gray-300">
-        <button className="text-[20px]" style={{ color: profileSettings.textColor }}>Visão Geral</button>
-        <button className="text-[20px]" style={{ color: profileSettings.textColor }}>Fandoms</button>
-        <button className="text-[20px]" style={{ color: profileSettings.textColor }}>Publicações</button>
-        <button className="text-[20px]" style={{ color: profileSettings.textColor }}>Seguidores</button>
-        <button className="text-[20px]" style={{ color: profileSettings.textColor }}>Seguindo</button>
-        <button className="text-[20px]" style={{ color: profileSettings.textColor }}>Amigos</button>
-        <button className="text-[20px]" style={{ color: profileSettings.textColor }}>Conquistas</button>
+        <button 
+          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          style={{ 
+            backgroundColor: profileSettings.buttonBackgroundColor,
+            color: profileSettings.buttonTextColor
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonTextColor;
+          }}
+        >
+          Visão Geral
+        </button>
+        <button 
+          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          style={{ 
+            backgroundColor: profileSettings.buttonBackgroundColor,
+            color: profileSettings.buttonTextColor
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonTextColor;
+          }}
+        >
+          Fandoms
+        </button>
+        <button 
+          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          style={{ 
+            backgroundColor: profileSettings.buttonBackgroundColor,
+            color: profileSettings.buttonTextColor
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonTextColor;
+          }}
+        >
+          Publicações
+        </button>
+        <button 
+          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          style={{ 
+            backgroundColor: profileSettings.buttonBackgroundColor,
+            color: profileSettings.buttonTextColor
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonTextColor;
+          }}
+        >
+          Seguidores
+        </button>
+        <button 
+          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          style={{ 
+            backgroundColor: profileSettings.buttonBackgroundColor,
+            color: profileSettings.buttonTextColor
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonTextColor;
+          }}
+        >
+          Seguindo
+        </button>
+        <button 
+          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          style={{ 
+            backgroundColor: profileSettings.buttonBackgroundColor,
+            color: profileSettings.buttonTextColor
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonTextColor;
+          }}
+        >
+          Amigos
+        </button>
+        <button 
+          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          style={{ 
+            backgroundColor: profileSettings.buttonBackgroundColor,
+            color: profileSettings.buttonTextColor
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.color = profileSettings.buttonTextColor;
+          }}
+        >
+          Conquistas
+        </button>
       </div>
 
       {/* Seção de Visão Geral */}
@@ -478,8 +692,8 @@ export default function ProfilePage() {
               className="flex flex-col w-[350px] min-h-[250px] p-[20px] rounded-[10px]"
               style={{ backgroundColor: profileSettings.aboutBackgroundColor }}
             >
-              <p className="text-[30px] font-bold" style={{ color: profileSettings.textColor }}>Sobre</p>
-              <p className="text-[16px]" style={{ color: profileSettings.textColor }}>
+              <p className="text-[30px] font-bold" style={{ color: profileSettings.aboutTitleColor }}>Sobre</p>
+              <p className="text-[16px]" style={{ color: profileSettings.aboutTextColor }}>
                 {profileSettings.about || "Adicione uma descrição sobre você..."}
               </p>
             </div>
@@ -607,6 +821,28 @@ export default function ProfilePage() {
                 />
               </div>
 
+              {/* Imagem de Fundo do Perfil */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Imagem de Fundo do Perfil</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBackgroundImageUpload}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
+              </div>
+
+              {/* Cor do Apelido */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Cor do Apelido</label>
+                <input
+                  type="color"
+                  value={profileSettings.nicknameColor}
+                  onChange={(e) => setProfileSettings(prev => ({ ...prev, nicknameColor: e.target.value }))}
+                  className="w-full h-10 border border-gray-300 rounded"
+                />
+              </div>
+
               {/* Cor de Fundo do Sobre */}
               <div>
                 <label className="block text-sm font-medium mb-2">Cor de Fundo do Sobre</label>
@@ -618,20 +854,85 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* Cor do Texto */}
+              {/* Cor do Título "Sobre" */}
               <div>
-                <label className="block text-sm font-medium mb-2">Cor do Texto</label>
+                <label className="block text-sm font-medium mb-2">Cor do Título &quot;Sobre&quot;</label>
                 <input
                   type="color"
-                  value={profileSettings.textColor}
-                  onChange={(e) => setProfileSettings(prev => ({ ...prev, textColor: e.target.value }))}
+                  value={profileSettings.aboutTitleColor}
+                  onChange={(e) => setProfileSettings(prev => ({ ...prev, aboutTitleColor: e.target.value }))}
                   className="w-full h-10 border border-gray-300 rounded"
                 />
               </div>
 
+              {/* Cor do Texto do Sobre */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Cor do Texto do Sobre</label>
+                <input
+                  type="color"
+                  value={profileSettings.aboutTextColor}
+                  onChange={(e) => setProfileSettings(prev => ({ ...prev, aboutTextColor: e.target.value }))}
+                  className="w-full h-10 border border-gray-300 rounded"
+                />
+              </div>
+
+              {/* Cor de Fundo dos Botões */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Cor de Fundo dos Botões</label>
+                <input
+                  type="color"
+                  value={profileSettings.buttonBackgroundColor}
+                  onChange={(e) => setProfileSettings(prev => ({ ...prev, buttonBackgroundColor: e.target.value }))}
+                  className="w-full h-10 border border-gray-300 rounded"
+                />
+              </div>
+
+              {/* Cor do Texto dos Botões */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Cor do Texto dos Botões</label>
+                <input
+                  type="color"
+                  value={profileSettings.buttonTextColor}
+                  onChange={(e) => setProfileSettings(prev => ({ ...prev, buttonTextColor: e.target.value }))}
+                  className="w-full h-10 border border-gray-300 rounded"
+                />
+              </div>
+
+              {/* Cor de Fundo dos Botões (Hover) */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Cor de Fundo dos Botões (Hover)</label>
+                <input
+                  type="color"
+                  value={profileSettings.buttonHoverBackgroundColor}
+                  onChange={(e) => setProfileSettings(prev => ({ ...prev, buttonHoverBackgroundColor: e.target.value }))}
+                  className="w-full h-10 border border-gray-300 rounded"
+                />
+              </div>
+
+              {/* Cor do Texto dos Botões (Hover) */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Cor do Texto dos Botões (Hover)</label>
+                <input
+                  type="color"
+                  value={profileSettings.buttonHoverTextColor}
+                  onChange={(e) => setProfileSettings(prev => ({ ...prev, buttonHoverTextColor: e.target.value }))}
+                  className="w-full h-10 border border-gray-300 rounded"
+                />
+              </div>
+
+              {/* Botão Resetar Cores */}
+              <div className="pt-2">
+                <button
+                  onClick={handleResetColors}
+                  className="w-full bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600 transition-colors"
+                >
+                  🔄 Resetar Cores para Padrão
+                </button>
+              </div>
+
               {/* Mensagem de feedback */}
               {message && (
-                <div className={`p-2 rounded ${message.includes('sucesso') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                <div className={`p-2 rounded ${message.includes('sucesso') || message.includes('resetadas') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                   {message}
                 </div>
               )}
