@@ -36,6 +36,9 @@ interface ProfileSettings {
   about: string;
 }
 
+// Tipo para as seções disponíveis
+type ActiveSection = 'visao-geral' | 'fandoms' | 'publicacoes' | 'seguidores' | 'seguindo' | 'amigos' | 'conquistas' | 'configuracoes';
+
 /**
  * Página de perfil do usuário
  * 
@@ -74,6 +77,9 @@ export default function ProfilePage() {
     buttonHasBackground: true,
     about: ""
   });
+  
+  // Estado para controlar qual seção está ativa
+  const [activeSection, setActiveSection] = useState<ActiveSection>('visao-geral');
   
   // Cores padrão para reset
   const defaultColors: ProfileSettings = {
@@ -419,6 +425,190 @@ export default function ProfilePage() {
   };
 
   /**
+   * Muda a seção ativa do perfil
+   * @param section - Seção para ativar
+   */
+  const handleSectionChange = (section: ActiveSection) => {
+    setActiveSection(section);
+  };
+
+  /**
+   * Renderiza o conteúdo da seção Visão Geral
+   */
+  const renderVisaoGeral = () => (
+    <div className="mt-[20px] flex flex-col lg:flex-row gap-6">
+      {/* Seção da Esquerda */}
+      <div className="flex flex-col gap-[20px] w-full lg:w-auto">
+        {/* Seção do Sobre */}
+        <div 
+          className="flex flex-col w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px]"
+          style={{ backgroundColor: profileSettings.aboutBackgroundColor }}
+        >
+          <p className="text-[24px] sm:text-[28px] lg:text-[30px] font-bold" style={{ color: profileSettings.aboutTitleColor }}>Sobre</p>
+          <p 
+            className="text-[14px] sm:text-[15px] lg:text-[16px] whitespace-pre-wrap" 
+            style={{ color: profileSettings.aboutTextColor }}
+          >
+            {profileSettings.about || "Adicione uma descrição sobre você..."}
+          </p>
+        </div>
+        {/* Seção de Suas Fandoms */}
+        <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px] blur-sm">
+          <p>Suas Fandoms</p>
+        </div>
+        {/* Seção de Amigos */}
+        <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px]">
+          <p>Amigos</p>
+        </div>
+      </div>
+      {/* Seção da Direita */}
+      <div className="w-full lg:w-auto lg:flex-1">
+        {/* Seção 1 */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex-1">
+            <p className="text-lg font-semibold">Nível de Fã</p>
+          </div>
+          <div className="flex-1">
+            <p className="text-lg font-semibold">Atividade</p>
+          </div>
+        </div>
+        {/* Seção 2 */}
+        <div className="mb-6">
+          <p className="text-lg font-semibold">Publicações</p>
+        </div>
+        {/* Seção 3 */}
+        <div>
+          <p className="text-lg font-semibold">Fandoms Populares</p>
+        </div>
+      </div>
+    </div>
+  );
+
+  /**
+   * Renderiza o conteúdo da seção Fandoms
+   */
+  const renderFandoms = () => (
+    <div className="mt-[20px]">
+      <UserFandomsSection
+        fandoms={userFandoms}
+        isLoading={loadingFandoms}
+        onCreateNewFandom={handleCreateNewFandom}
+        onEditFandom={handleEditFandom}
+        onDeleteFandom={handleDeleteFandom}
+      />
+    </div>
+  );
+
+  /**
+   * Renderiza o conteúdo da seção Publicações
+   */
+  const renderPublicacoes = () => (
+    <div className="mt-[20px]">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Publicações</h2>
+        <p className="text-gray-600">Nenhuma publicação encontrada.</p>
+        <p className="text-sm text-gray-500 mt-2">As publicações aparecerão aqui quando você criar conteúdo.</p>
+      </div>
+    </div>
+  );
+
+  /**
+   * Renderiza o conteúdo da seção Seguidores
+   */
+  const renderSeguidores = () => (
+    <div className="mt-[20px]">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Seguidores</h2>
+        <p className="text-gray-600">Nenhum seguidor encontrado.</p>
+        <p className="text-sm text-gray-500 mt-2">Quando pessoas seguirem você, elas aparecerão aqui.</p>
+      </div>
+    </div>
+  );
+
+  /**
+   * Renderiza o conteúdo da seção Seguindo
+   */
+  const renderSeguindo = () => (
+    <div className="mt-[20px]">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Seguindo</h2>
+        <p className="text-gray-600">Você não está seguindo ninguém ainda.</p>
+        <p className="text-sm text-gray-500 mt-2">Quando você seguir pessoas, elas aparecerão aqui.</p>
+      </div>
+    </div>
+  );
+
+  /**
+   * Renderiza o conteúdo da seção Amigos
+   */
+  const renderAmigos = () => (
+    <div className="mt-[20px]">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Amigos</h2>
+        <p className="text-gray-600">Nenhum amigo encontrado.</p>
+        <p className="text-sm text-gray-500 mt-2">Quando você adicionar amigos, eles aparecerão aqui.</p>
+      </div>
+    </div>
+  );
+
+  /**
+   * Renderiza o conteúdo da seção Conquistas
+   */
+  const renderConquistas = () => (
+    <div className="mt-[20px]">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Conquistas</h2>
+        <p className="text-gray-600">Nenhuma conquista desbloqueada ainda.</p>
+        <p className="text-sm text-gray-500 mt-2">Continue participando para desbloquear conquistas!</p>
+      </div>
+    </div>
+  );
+
+  /**
+   * Renderiza o conteúdo da seção Configurações
+   */
+  const renderConfiguracoes = () => (
+    <div className="mt-[20px]">
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-2xl font-bold mb-4">Configurações</h2>
+        <p className="text-gray-600">Use o botão &quot;Editar Perfil&quot; no cabeçalho para acessar as configurações.</p>
+        <button 
+          onClick={() => setShowEditModal(true)}
+          className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+        >
+          Abrir Configurações
+        </button>
+      </div>
+    </div>
+  );
+
+  /**
+   * Renderiza o conteúdo baseado na seção ativa
+   */
+  const renderActiveSection = () => {
+    switch (activeSection) {
+      case 'visao-geral':
+        return renderVisaoGeral();
+      case 'fandoms':
+        return renderFandoms();
+      case 'publicacoes':
+        return renderPublicacoes();
+      case 'seguidores':
+        return renderSeguidores();
+      case 'seguindo':
+        return renderSeguindo();
+      case 'amigos':
+        return renderAmigos();
+      case 'conquistas':
+        return renderConquistas();
+      case 'configuracoes':
+        return renderConfiguracoes();
+      default:
+        return renderVisaoGeral();
+    }
+  };
+
+  /**
    * Exclui uma fandom após confirmação do usuário
    * @param fandomId - ID da fandom a ser excluída
    */
@@ -553,137 +743,225 @@ export default function ProfilePage() {
       {/* Seção de Buttons */}
       <div className="flex gap-2 sm:gap-[10px] px-4 sm:px-6 lg:px-[100px] pt-[25px] pb-[10px] border-b border-gray-300 overflow-x-auto">
         <button 
-          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
+          onClick={() => handleSectionChange('visao-geral')}
+          className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
+            activeSection === 'visao-geral' ? 'ring-2 ring-blue-500' : ''
+          }`}
           style={{ 
-            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
-            color: profileSettings.buttonTextColor
+            backgroundColor: activeSection === 'visao-geral' 
+              ? profileSettings.buttonHoverBackgroundColor 
+              : (profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent'),
+            color: activeSection === 'visao-geral' 
+              ? profileSettings.buttonHoverTextColor 
+              : profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            if (activeSection !== 'visao-geral') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonTextColor;
+            if (activeSection !== 'visao-geral') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonTextColor;
+            }
           }}
         >
           Visão Geral
         </button>
         <button 
-          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
+          onClick={() => handleSectionChange('fandoms')}
+          className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
+            activeSection === 'fandoms' ? 'ring-2 ring-blue-500' : ''
+          }`}
           style={{ 
-            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
-            color: profileSettings.buttonTextColor
+            backgroundColor: activeSection === 'fandoms' 
+              ? profileSettings.buttonHoverBackgroundColor 
+              : (profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent'),
+            color: activeSection === 'fandoms' 
+              ? profileSettings.buttonHoverTextColor 
+              : profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            if (activeSection !== 'fandoms') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonTextColor;
+            if (activeSection !== 'fandoms') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonTextColor;
+            }
           }}
         >
           Fandoms
         </button>
         <button 
-          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
+          onClick={() => handleSectionChange('publicacoes')}
+          className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
+            activeSection === 'publicacoes' ? 'ring-2 ring-blue-500' : ''
+          }`}
           style={{ 
-            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
-            color: profileSettings.buttonTextColor
+            backgroundColor: activeSection === 'publicacoes' 
+              ? profileSettings.buttonHoverBackgroundColor 
+              : (profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent'),
+            color: activeSection === 'publicacoes' 
+              ? profileSettings.buttonHoverTextColor 
+              : profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            if (activeSection !== 'publicacoes') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonTextColor;
+            if (activeSection !== 'publicacoes') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonTextColor;
+            }
           }}
         >
           Publicações
         </button>
         <button 
-          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
+          onClick={() => handleSectionChange('seguidores')}
+          className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
+            activeSection === 'seguidores' ? 'ring-2 ring-blue-500' : ''
+          }`}
           style={{ 
-            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
-            color: profileSettings.buttonTextColor
+            backgroundColor: activeSection === 'seguidores' 
+              ? profileSettings.buttonHoverBackgroundColor 
+              : (profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent'),
+            color: activeSection === 'seguidores' 
+              ? profileSettings.buttonHoverTextColor 
+              : profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            if (activeSection !== 'seguidores') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonTextColor;
+            if (activeSection !== 'seguidores') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonTextColor;
+            }
           }}
         >
           Seguidores
         </button>
         <button 
-          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
+          onClick={() => handleSectionChange('seguindo')}
+          className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
+            activeSection === 'seguindo' ? 'ring-2 ring-blue-500' : ''
+          }`}
           style={{ 
-            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
-            color: profileSettings.buttonTextColor
+            backgroundColor: activeSection === 'seguindo' 
+              ? profileSettings.buttonHoverBackgroundColor 
+              : (profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent'),
+            color: activeSection === 'seguindo' 
+              ? profileSettings.buttonHoverTextColor 
+              : profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            if (activeSection !== 'seguindo') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonTextColor;
+            if (activeSection !== 'seguindo') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonTextColor;
+            }
           }}
         >
           Seguindo
         </button>
         <button 
-          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
+          onClick={() => handleSectionChange('amigos')}
+          className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
+            activeSection === 'amigos' ? 'ring-2 ring-blue-500' : ''
+          }`}
           style={{ 
-            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
-            color: profileSettings.buttonTextColor
+            backgroundColor: activeSection === 'amigos' 
+              ? profileSettings.buttonHoverBackgroundColor 
+              : (profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent'),
+            color: activeSection === 'amigos' 
+              ? profileSettings.buttonHoverTextColor 
+              : profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            if (activeSection !== 'amigos') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonTextColor;
+            if (activeSection !== 'amigos') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonTextColor;
+            }
           }}
         >
           Amigos
         </button>
         <button 
-          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
+          onClick={() => handleSectionChange('conquistas')}
+          className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
+            activeSection === 'conquistas' ? 'ring-2 ring-blue-500' : ''
+          }`}
           style={{ 
-            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
-            color: profileSettings.buttonTextColor
+            backgroundColor: activeSection === 'conquistas' 
+              ? profileSettings.buttonHoverBackgroundColor 
+              : (profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent'),
+            color: activeSection === 'conquistas' 
+              ? profileSettings.buttonHoverTextColor 
+              : profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            if (activeSection !== 'conquistas') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonTextColor;
+            if (activeSection !== 'conquistas') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonTextColor;
+            }
           }}
         >
           Conquistas
         </button>
         <button 
-          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
+          onClick={() => handleSectionChange('configuracoes')}
+          className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
+            activeSection === 'configuracoes' ? 'ring-2 ring-blue-500' : ''
+          }`}
           style={{ 
-            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
-            color: profileSettings.buttonTextColor
+            backgroundColor: activeSection === 'configuracoes' 
+              ? profileSettings.buttonHoverBackgroundColor 
+              : (profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent'),
+            color: activeSection === 'configuracoes' 
+              ? profileSettings.buttonHoverTextColor 
+              : profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            if (activeSection !== 'configuracoes') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
-            e.currentTarget.style.color = profileSettings.buttonTextColor;
+            if (activeSection !== 'configuracoes') {
+              e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
+              e.currentTarget.style.color = profileSettings.buttonTextColor;
+            }
           }}
         >
           Configurações
@@ -700,67 +978,8 @@ export default function ProfilePage() {
           backgroundAttachment: 'fixed'
         }}
       >
-        <div className="mt-[20px] flex flex-col lg:flex-row gap-6">
-          {/* Seção da Esquerda */}
-          <div className="flex flex-col gap-[20px] w-full lg:w-auto">
-            {/* Seção do Sobre */}
-            <div 
-              className="flex flex-col w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px]"
-              style={{ backgroundColor: profileSettings.aboutBackgroundColor }}
-            >
-              <p className="text-[24px] sm:text-[28px] lg:text-[30px] font-bold" style={{ color: profileSettings.aboutTitleColor }}>Sobre</p>
-              <p 
-                className="text-[14px] sm:text-[15px] lg:text-[16px] whitespace-pre-wrap" 
-                style={{ color: profileSettings.aboutTextColor }}
-              >
-                {profileSettings.about || "Adicione uma descrição sobre você..."}
-              </p>
-            </div>
-            {/* Seção de Suas Fandoms */}
-            <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px] blur-sm">
-              <p>Suas Fandoms</p>
-            </div>
-            {/* Seção de Amigos */}
-            <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px]">
-              <p>Amigos</p>
-            </div>
-          </div>
-          {/* Seção da Direita */}
-          <div className="w-full lg:w-auto lg:flex-1">
-            {/* Seção 1 */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <div className="flex-1">
-                <p className="text-lg font-semibold">Nível de Fã</p>
-              </div>
-              <div className="flex-1">
-                <p className="text-lg font-semibold">Atividade</p>
-              </div>
-            </div>
-            {/* Seção 2 */}
-            <div className="mb-6">
-              <p className="text-lg font-semibold">Publicações</p>
-            </div>
-            {/* Seção 3 */}
-            <div>
-              <p className="text-lg font-semibold">Fandoms Populares</p>
-            </div>
-          </div>
-        </div>
+        {renderActiveSection()}
       </main>
-
-      {/* Layout em grid responsivo */}
-      <div className="">
-        {/* Seção de Fandoms - Ocupa toda a largura */}
-        <div className="lg:col-span-2">
-          <UserFandomsSection
-            fandoms={userFandoms}
-            isLoading={loadingFandoms}
-            onCreateNewFandom={handleCreateNewFandom}
-            onEditFandom={handleEditFandom}
-            onDeleteFandom={handleDeleteFandom}
-          />
-        </div>
-      </div>
 
       {/* Modal de Edição de Perfil */}
       {showEditModal && (
