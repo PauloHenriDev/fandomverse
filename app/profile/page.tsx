@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { UserFandomsSection } from "@/components/templates";
 import Header from "@/components/ui/Header";
@@ -33,6 +32,7 @@ interface ProfileSettings {
   buttonTextColor: string;
   buttonHoverBackgroundColor: string;
   buttonHoverTextColor: string;
+  buttonHasBackground: boolean;
   about: string;
 }
 
@@ -71,6 +71,7 @@ export default function ProfilePage() {
     buttonTextColor: "#000000",
     buttonHoverBackgroundColor: "#f3f4f6",
     buttonHoverTextColor: "#000000",
+    buttonHasBackground: true,
     about: ""
   });
   
@@ -87,6 +88,7 @@ export default function ProfilePage() {
     buttonTextColor: "#000000",
     buttonHoverBackgroundColor: "#f3f4f6",
     buttonHoverTextColor: "#000000",
+    buttonHasBackground: true,
     about: ""
   };
 
@@ -408,9 +410,12 @@ export default function ProfilePage() {
       buttonBackgroundColor: defaultColors.buttonBackgroundColor,
       buttonTextColor: defaultColors.buttonTextColor,
       buttonHoverBackgroundColor: defaultColors.buttonHoverBackgroundColor,
-      buttonHoverTextColor: defaultColors.buttonHoverTextColor
+      buttonHoverTextColor: defaultColors.buttonHoverTextColor,
+      buttonHasBackground: defaultColors.buttonHasBackground,
+      backgroundImage: undefined,
+      headerImage: undefined
     }));
-    setMessage("Cores resetadas para o padrão!");
+    setMessage("Cores e imagens resetadas para o padrão!");
   };
 
   /**
@@ -455,25 +460,10 @@ export default function ProfilePage() {
     <div 
       className="min-h-screen" 
       style={{ 
-        backgroundColor: profileSettings.backgroundColor,
-        backgroundImage: profileSettings.backgroundImage ? `url(${profileSettings.backgroundImage})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed'
+        backgroundColor: profileSettings.backgroundColor
       }}
     >
       <Header />
-      {/* Botão de navegação para voltar à home */}
-      <div className="px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="inline-flex items-center text-[#926DF6] hover:text-[#A98AF8] transition-colors">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span className="hidden sm:inline">Voltar para Home</span>
-          <span className="sm:hidden">Voltar</span>
-        </Link>
-      </div>
-
       {/* Cabeçalho de Perfil */}
       <div 
         className="h-[200px] sm:h-[250px] lg:h-[300px] relative overflow-hidden"
@@ -565,15 +555,15 @@ export default function ProfilePage() {
         <button 
           className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
-            backgroundColor: profileSettings.buttonBackgroundColor,
+            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
             color: profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonTextColor;
           }}
         >
@@ -582,15 +572,15 @@ export default function ProfilePage() {
         <button 
           className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
-            backgroundColor: profileSettings.buttonBackgroundColor,
+            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
             color: profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonTextColor;
           }}
         >
@@ -599,15 +589,15 @@ export default function ProfilePage() {
         <button 
           className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
-            backgroundColor: profileSettings.buttonBackgroundColor,
+            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
             color: profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonTextColor;
           }}
         >
@@ -616,15 +606,15 @@ export default function ProfilePage() {
         <button 
           className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
-            backgroundColor: profileSettings.buttonBackgroundColor,
+            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
             color: profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonTextColor;
           }}
         >
@@ -633,15 +623,15 @@ export default function ProfilePage() {
         <button 
           className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
-            backgroundColor: profileSettings.buttonBackgroundColor,
+            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
             color: profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonTextColor;
           }}
         >
@@ -650,15 +640,15 @@ export default function ProfilePage() {
         <button 
           className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
-            backgroundColor: profileSettings.buttonBackgroundColor,
+            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
             color: profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonTextColor;
           }}
         >
@@ -667,24 +657,49 @@ export default function ProfilePage() {
         <button 
           className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
-            backgroundColor: profileSettings.buttonBackgroundColor,
+            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
             color: profileSettings.buttonTextColor
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonHoverBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = profileSettings.buttonBackgroundColor;
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
             e.currentTarget.style.color = profileSettings.buttonTextColor;
           }}
         >
           Conquistas
         </button>
+        <button 
+          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
+          style={{ 
+            backgroundColor: profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent',
+            color: profileSettings.buttonTextColor
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonHoverBackgroundColor : 'transparent';
+            e.currentTarget.style.color = profileSettings.buttonHoverTextColor;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = profileSettings.buttonHasBackground ? profileSettings.buttonBackgroundColor : 'transparent';
+            e.currentTarget.style.color = profileSettings.buttonTextColor;
+          }}
+        >
+          Configurações
+        </button>
       </div>
 
       {/* Seção de Visão Geral */}
-      <main className="px-4 sm:px-6 lg:px-[100px]">
+      <main 
+        className="px-4 sm:px-6 lg:px-[100px]"
+        style={{ 
+          backgroundImage: profileSettings.backgroundImage ? `url(${profileSettings.backgroundImage})` : 'none',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
         <div className="mt-[20px] flex flex-col lg:flex-row gap-6">
           {/* Seção da Esquerda */}
           <div className="flex flex-col gap-[20px] w-full lg:w-auto">
@@ -694,7 +709,10 @@ export default function ProfilePage() {
               style={{ backgroundColor: profileSettings.aboutBackgroundColor }}
             >
               <p className="text-[24px] sm:text-[28px] lg:text-[30px] font-bold" style={{ color: profileSettings.aboutTitleColor }}>Sobre</p>
-              <p className="text-[14px] sm:text-[15px] lg:text-[16px]" style={{ color: profileSettings.aboutTextColor }}>
+              <p 
+                className="text-[14px] sm:text-[15px] lg:text-[16px] whitespace-pre-wrap" 
+                style={{ color: profileSettings.aboutTextColor }}
+              >
                 {profileSettings.about || "Adicione uma descrição sobre você..."}
               </p>
             </div>
@@ -877,17 +895,6 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* Cor de Fundo dos Botões */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Cor de Fundo dos Botões</label>
-                <input
-                  type="color"
-                  value={profileSettings.buttonBackgroundColor}
-                  onChange={(e) => setProfileSettings(prev => ({ ...prev, buttonBackgroundColor: e.target.value }))}
-                  className="w-full h-10 border border-gray-300 rounded"
-                />
-              </div>
-
               {/* Cor do Texto dos Botões */}
               <div>
                 <label className="block text-sm font-medium mb-2">Cor do Texto dos Botões</label>
@@ -899,16 +906,45 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* Cor de Fundo dos Botões (Hover) */}
-              <div>
-                <label className="block text-sm font-medium mb-2">Cor de Fundo dos Botões (Hover)</label>
+              {/* Checkbox para Background dos Botões */}
+              <div className="flex items-center space-x-2">
                 <input
-                  type="color"
-                  value={profileSettings.buttonHoverBackgroundColor}
-                  onChange={(e) => setProfileSettings(prev => ({ ...prev, buttonHoverBackgroundColor: e.target.value }))}
-                  className="w-full h-10 border border-gray-300 rounded"
+                  type="checkbox"
+                  id="buttonHasBackground"
+                  checked={profileSettings.buttonHasBackground}
+                  onChange={(e) => setProfileSettings(prev => ({ ...prev, buttonHasBackground: e.target.checked }))}
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                 />
+                <label htmlFor="buttonHasBackground" className="text-sm font-medium">
+                  Botões têm background
+                </label>
               </div>
+
+              {/* Cor de Fundo dos Botões - Condicional */}
+              {profileSettings.buttonHasBackground && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">Cor de Fundo dos Botões</label>
+                  <input
+                    type="color"
+                    value={profileSettings.buttonBackgroundColor}
+                    onChange={(e) => setProfileSettings(prev => ({ ...prev, buttonBackgroundColor: e.target.value }))}
+                    className="w-full h-10 border border-gray-300 rounded"
+                  />
+                </div>
+              )}
+
+              {/* Cor de Fundo dos Botões (Hover) - Condicional */}
+              {profileSettings.buttonHasBackground && (
+                <div>
+                  <label className="block text-sm font-medium mb-2">Cor de Fundo dos Botões (Hover)</label>
+                  <input
+                    type="color"
+                    value={profileSettings.buttonHoverBackgroundColor}
+                    onChange={(e) => setProfileSettings(prev => ({ ...prev, buttonHoverBackgroundColor: e.target.value }))}
+                    className="w-full h-10 border border-gray-300 rounded"
+                  />
+                </div>
+              )}
 
               {/* Cor do Texto dos Botões (Hover) */}
               <div>
