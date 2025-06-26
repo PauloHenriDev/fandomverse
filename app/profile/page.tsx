@@ -433,6 +433,19 @@ export default function ProfilePage() {
   };
 
   /**
+   * Faz logout do usuário e redireciona para a home page
+   */
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      router.push("/"); // Redireciona para a home page
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      setMessage("Erro ao fazer logout");
+    }
+  };
+
+  /**
    * Renderiza o conteúdo da seção Visão Geral
    */
   const renderVisaoGeral = () => (
@@ -571,13 +584,31 @@ export default function ProfilePage() {
     <div className="mt-[20px]">
       <div className="bg-white p-6 rounded-lg shadow">
         <h2 className="text-2xl font-bold mb-4">Configurações</h2>
-        <p className="text-gray-600">Use o botão &quot;Editar Perfil&quot; no cabeçalho para acessar as configurações.</p>
-        <button 
-          onClick={() => setShowEditModal(true)}
-          className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
-        >
-          Abrir Configurações
-        </button>
+        <p className="text-gray-600 mb-6">Gerencie suas configurações de perfil e conta.</p>
+        
+        <div className="space-y-4">
+          <div className="border-b border-gray-200 pb-4">
+            <h3 className="text-lg font-semibold mb-2">Perfil</h3>
+            <p className="text-gray-600 mb-3">Personalize seu perfil, cores e informações.</p>
+            <button 
+              onClick={() => setShowEditModal(true)}
+              className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors"
+            >
+              Editar Perfil
+            </button>
+          </div>
+          
+          <div className="border-b border-gray-200 pb-4">
+            <h3 className="text-lg font-semibold mb-2">Conta</h3>
+            <p className="text-gray-600 mb-3">Gerencie sua conta e sessão.</p>
+            <button 
+              onClick={handleLogout}
+              className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors"
+            >
+              Fazer Logout
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
