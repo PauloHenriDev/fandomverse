@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { UserFandomsSection } from "@/components/templates";
+import Header from "@/components/ui/Header";
 
 // Interface que define a estrutura de uma fandom
 interface Fandom {
@@ -234,9 +235,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 p-6">
+    <div className="">
+      {/* max-w-4xl mx-auto mt-10 p-6 */}
+      <Header />
       {/* Botão de navegação para voltar à home */}
-      <div className="mb-4">
+      <div className="">
         <Link href="/" className="inline-flex items-center text-[#926DF6] hover:text-[#A98AF8] transition-colors">
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -245,25 +248,23 @@ export default function ProfilePage() {
         </Link>
       </div>
 
-      {/* Layout em grid responsivo */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Seção do Perfil - Coluna esquerda */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Meu Perfil</h1>
-          
-          <form onSubmit={handleUpdateProfile} className="space-y-4">
-            {/* Seção de Avatar com upload */}
-            <div className="text-center">
-              <div className="relative inline-block">
-                <Image
-                  src={avatarUrl || `https://ui-avatars.com/api/?name=${user.email}&size=100&background=926DF6&color=fff`}
-                  alt="Avatar"
-                  width={96}
-                  height={96}
-                  className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-[#926DF6]"
-                />
-                {/* Botão de upload de avatar */}
-                <label className="absolute bottom-0 right-0 bg-[#926DF6] text-white p-2 rounded-full cursor-pointer hover:bg-[#A98AF8] transition-colors">
+      {/* Cabeçalho de Perfil */}
+      <div className="bg-orange-500 h-[300px]">
+        {/* Imagem de Perfil, Nome e Botão */}
+        <div className="flex justify-between pl-[100px] pr-[100px]">
+          {/* Imagem de Perfil e Nome*/}
+          <div className="flex mt-[150px]">
+            {/* Imagem de Perfil */}
+            <div className="relative">
+              <Image
+                src={avatarUrl || `https://ui-avatars.com/api/?name=${user.email}&size=100&background=926DF6&color=fff`}
+                alt="Avatar"
+                width={96}
+                height={96}
+                className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-[#926DF6]"
+              />
+              {/* Botão de upload de avatar */}
+              <label className="absolute bottom-0 right-0 bg-[#926DF6] text-white p-2 rounded-full cursor-pointer hover:bg-[#A98AF8] transition-colors">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
@@ -274,59 +275,106 @@ export default function ProfilePage() {
                     className="hidden"
                   />
                 </label>
-              </div>
             </div>
 
-            {/* Campo de email (somente leitura) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-              <input
-                type="email"
-                value={user.email || ""}
-                disabled
-                className="w-full p-2 border border-gray-300 rounded bg-gray-50 text-gray-500"
-              />
+            {/* Nome */}
+            <div className="ml-[30px]">
+              <p className="text-[40px] font-bold">Apelido</p>
             </div>
-
-            {/* Campo de nickname (editável) */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nickname</label>
-              <input
-                type="text"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder="Digite seu nickname"
-                className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
-              />
-            </div>
-
-            {/* Mensagem de feedback para o usuário */}
-            {message && (
-              <div className={`p-3 rounded ${message.includes('Erro') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                {message}
-              </div>
-            )}
-
-            {/* Botões de ação */}
-            <div className="flex gap-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-[#926DF6] text-white py-2 px-4 rounded hover:bg-[#A98AF8] transition-colors disabled:opacity-50"
-              >
-                {loading ? "Salvando..." : "Salvar Perfil"}
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </form>
+          </div>
+          {/* Botão */}
+          <div className="mt-[240px]">
+            <button className="bg-red-500 text-white py-2 px-4 rounded hover:bg-[#A98AF8] transition-colors">Editar Perfil</button>
+          </div>
         </div>
+      </div>
+
+      {/* Seção de Fandoms */}
+      <div className="flex pl-[100px] pr-[100px] gap-[20px] pb-[10px] border-b border-gray-300 mt-[10px]">
+        <div className="flex flex-col items-center">
+          <p className="text-[30px] font-bold">X</p>
+          <p className="text-[18px]">Fandoms</p>
+        </div>
+        <div className="flex flex-col items-center blur-sm">
+          <p className="text-[30px] font-bold">X</p>
+          <p className="text-[18px]">Publicações</p>
+        </div>
+        <div className="flex flex-col items-center blur-sm">
+          <p className="text-[30px] font-bold">X</p>
+          <p className="text-[18px]">Seguidores</p>
+        </div>
+        <div className="flex flex-col items-center blur-sm">
+          <p className="text-[30px] font-bold">X</p>
+          <p className="text-[18px]">Seguindo</p>
+        </div>
+        <div className="flex flex-col items-center blur-sm">
+          <p className="text-[30px] font-bold">X</p>
+          <p className="text-[18px]">Amigos</p>
+        </div>
+        <div className="flex flex-col items-center blur-sm">
+          <p className="text-[30px] font-bold">X</p>
+          <p className="text-[18px]">Conquistas</p>
+        </div>
+      </div>
+
+      {/* Seção de Buttons */}
+      <div className="flex gap-[10px] pl-[100px] pr-[100px] pt-[25px] pb-[10px] border-b border-gray-300">
+        <button className="text-[20px]">Visão Geral</button>
+        <button className="text-[20px]">Fandoms</button>
+        <button className="text-[20px]">Publicações</button>
+        <button className="text-[20px]">Seguidores</button>
+        <button className="text-[20px]">Seguindo</button>
+        <button className="text-[20px]">Amigos</button>
+        <button className="text-[20px]">Conquistas</button>
+      </div>
+
+      {/* Seção de Visão Geral */}
+      <main className="pl-[100px] pr-[100px]">
+        <div className="mt-[20px] flex">
+          {/* Seção da Esquerda */}
+          <div className="flex flex-col gap-[20px]">
+            {/* Seção do Sobre */}
+            <div className="flex flex-col bg-red-500 w-[350px] min-h-[250px] p-[20px] rounded-[10px]">
+              <p className="text-[30px] font-bold">Sobre</p>
+              <p className="text-[16px]">Descrição Lorem ipsum dolor sit amet consectetur adipisicing elit. Fugit dolores magnam placeat! Quia, deserunt est a dicta, libero amet reprehenderit assumenda autem quod iure hic ducimus laborum nobis doloremque mollitia. lorem</p>
+            </div>
+            {/* Seção de Suas Fandoms */}
+            <div className="flex flex-col bg-red-500 w-[350px] min-h-[250px] p-[20px] rounded-[10px] blur-sm">
+              <p>Suas Fandoms</p>
+            </div>
+            {/* Seção de Amigos */}
+            <div className="flex flex-col bg-red-500 w-[350px] min-h-[250px] p-[20px] rounded-[10px]">
+              <p>Amigos</p>
+            </div>
+          </div>
+          {/* Seção da Direita */}
+          <div>
+            {/* Seção 1 */}
+            <div className="flex">
+              <div>
+                <p>Nível de Fã</p>
+              </div>
+              <div>
+                <p>Atividade</p>
+              </div>
+            </div>
+            {/* Seção 2 */}
+            <div>
+              <p>Publicações</p>
+            </div>
+            {/* Seção 3 */}
+            <div>
+              <p>Fandoms Populares</p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+
+      {/* Layout em grid responsivo */}
+      <div className="">
+      {/* grid gap-6 lg:grid-cols-2 */}
+
 
         {/* Seção de Fandoms - Ocupa toda a largura */}
         <div className="lg:col-span-2">
@@ -339,6 +387,7 @@ export default function ProfilePage() {
           />
         </div>
       </div>
+
     </div>
   );
 } 
