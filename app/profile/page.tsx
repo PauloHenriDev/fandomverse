@@ -453,7 +453,7 @@ export default function ProfilePage() {
 
   return (
     <div 
-      className="" 
+      className="min-h-screen" 
       style={{ 
         backgroundColor: profileSettings.backgroundColor,
         backgroundImage: profileSettings.backgroundImage ? `url(${profileSettings.backgroundImage})` : 'none',
@@ -464,18 +464,19 @@ export default function ProfilePage() {
     >
       <Header />
       {/* Botão de navegação para voltar à home */}
-      <div className="">
+      <div className="px-4 sm:px-6 lg:px-8">
         <Link href="/" className="inline-flex items-center text-[#926DF6] hover:text-[#A98AF8] transition-colors">
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Voltar para Home
+          <span className="hidden sm:inline">Voltar para Home</span>
+          <span className="sm:hidden">Voltar</span>
         </Link>
       </div>
 
       {/* Cabeçalho de Perfil */}
       <div 
-        className="h-[300px] relative"
+        className="h-[200px] sm:h-[250px] lg:h-[300px] relative overflow-hidden"
         style={{ 
           backgroundColor: profileSettings.headerColor,
           backgroundImage: profileSettings.headerImage ? `url(${profileSettings.headerImage})` : 'none',
@@ -484,9 +485,9 @@ export default function ProfilePage() {
         }}
       >
         {/* Imagem de Perfil, Nome e Botão */}
-        <div className="flex justify-between pl-[100px] pr-[100px]">
+        <div className="flex flex-col sm:flex-row justify-between px-4 sm:px-6 lg:px-[100px] items-center sm:items-start h-full">
           {/* Imagem de Perfil e Nome*/}
-          <div className="flex mt-[150px]">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start mt-[80px] sm:mt-[120px] lg:mt-[150px]">
             {/* Imagem de Perfil */}
             <div className="relative">
               <Image
@@ -494,11 +495,11 @@ export default function ProfilePage() {
                 alt="Avatar"
                 width={96}
                 height={96}
-                className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-[#926DF6]"
+                className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full mx-auto mb-2 sm:mb-4 border-4 border-[#926DF6]"
               />
               {/* Botão de upload de avatar */}
-              <label className="absolute bottom-0 right-0 bg-[#926DF6] text-white p-2 rounded-full cursor-pointer hover:bg-[#A98AF8] transition-colors">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <label className="absolute bottom-0 right-0 bg-[#926DF6] text-white p-1 sm:p-1.5 lg:p-2 rounded-full cursor-pointer hover:bg-[#A98AF8] transition-colors">
+                  <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
                   <input
@@ -511,17 +512,17 @@ export default function ProfilePage() {
             </div>
 
             {/* Nome */}
-            <div className="ml-[30px]">
-              <p className="text-[40px] font-bold" style={{ color: profileSettings.nicknameColor }}>
+            <div className="sm:ml-[20px] lg:ml-[30px] text-center sm:text-left mt-2 sm:mt-0">
+              <p className="text-[18px] sm:text-[24px] lg:text-[32px] xl:text-[40px] font-bold" style={{ color: profileSettings.nicknameColor }}>
                 {nickname || "Apelido"}
               </p>
             </div>
           </div>
           {/* Botão */}
-          <div className="mt-[240px]">
+          <div className="mt-4 sm:mt-auto sm:mb-4 lg:mb-8">
             <button 
               onClick={() => setShowEditModal(true)}
-              className="bg-red-500 text-white py-2 px-4 rounded hover:bg-[#A98AF8] transition-colors"
+              className="bg-red-500 text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded hover:bg-[#A98AF8] transition-colors text-xs sm:text-sm lg:text-base"
             >
               Editar Perfil
             </button>
@@ -530,39 +531,39 @@ export default function ProfilePage() {
       </div>
 
       {/* Seção de Fandoms */}
-      <div className="flex pl-[100px] pr-[100px] gap-[20px] pb-[10px] border-b border-gray-300 mt-[10px]">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-[20px] px-4 sm:px-6 lg:px-[100px] pb-[10px] border-b border-gray-300 mt-[10px]">
         <div className="flex flex-col items-center">
-          <p className="text-[30px] font-bold" style={{ color: profileSettings.textColor }}>
+          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold" style={{ color: profileSettings.textColor }}>
             {userFandoms.length}
           </p>
-          <p className="text-[18px]" style={{ color: profileSettings.textColor }}>Fandoms</p>
+          <p className="text-[14px] sm:text-[16px] lg:text-[18px]" style={{ color: profileSettings.textColor }}>Fandoms</p>
         </div>
         <div className="flex flex-col items-center blur-sm">
-          <p className="text-[30px] font-bold">X</p>
-          <p className="text-[18px]">Publicações</p>
+          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
+          <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Publicações</p>
         </div>
         <div className="flex flex-col items-center blur-sm">
-          <p className="text-[30px] font-bold">X</p>
-          <p className="text-[18px]">Seguidores</p>
+          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
+          <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Seguidores</p>
         </div>
         <div className="flex flex-col items-center blur-sm">
-          <p className="text-[30px] font-bold">X</p>
-          <p className="text-[18px]">Seguindo</p>
+          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
+          <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Seguindo</p>
         </div>
         <div className="flex flex-col items-center blur-sm">
-          <p className="text-[30px] font-bold">X</p>
-          <p className="text-[18px]">Amigos</p>
+          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
+          <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Amigos</p>
         </div>
         <div className="flex flex-col items-center blur-sm">
-          <p className="text-[30px] font-bold">X</p>
-          <p className="text-[18px]">Conquistas</p>
+          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
+          <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Conquistas</p>
         </div>
       </div>
 
       {/* Seção de Buttons */}
-      <div className="flex gap-[10px] pl-[100px] pr-[100px] pt-[25px] pb-[10px] border-b border-gray-300">
+      <div className="flex gap-2 sm:gap-[10px] px-4 sm:px-6 lg:px-[100px] pt-[25px] pb-[10px] border-b border-gray-300 overflow-x-auto">
         <button 
-          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
             backgroundColor: profileSettings.buttonBackgroundColor,
             color: profileSettings.buttonTextColor
@@ -579,7 +580,7 @@ export default function ProfilePage() {
           Visão Geral
         </button>
         <button 
-          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
             backgroundColor: profileSettings.buttonBackgroundColor,
             color: profileSettings.buttonTextColor
@@ -596,7 +597,7 @@ export default function ProfilePage() {
           Fandoms
         </button>
         <button 
-          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
             backgroundColor: profileSettings.buttonBackgroundColor,
             color: profileSettings.buttonTextColor
@@ -613,7 +614,7 @@ export default function ProfilePage() {
           Publicações
         </button>
         <button 
-          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
             backgroundColor: profileSettings.buttonBackgroundColor,
             color: profileSettings.buttonTextColor
@@ -630,7 +631,7 @@ export default function ProfilePage() {
           Seguidores
         </button>
         <button 
-          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
             backgroundColor: profileSettings.buttonBackgroundColor,
             color: profileSettings.buttonTextColor
@@ -647,7 +648,7 @@ export default function ProfilePage() {
           Seguindo
         </button>
         <button 
-          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
             backgroundColor: profileSettings.buttonBackgroundColor,
             color: profileSettings.buttonTextColor
@@ -664,7 +665,7 @@ export default function ProfilePage() {
           Amigos
         </button>
         <button 
-          className="text-[20px] transition-colors duration-200 rounded px-2 py-1"
+          className="text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0"
           style={{ 
             backgroundColor: profileSettings.buttonBackgroundColor,
             color: profileSettings.buttonTextColor
@@ -683,47 +684,47 @@ export default function ProfilePage() {
       </div>
 
       {/* Seção de Visão Geral */}
-      <main className="pl-[100px] pr-[100px]">
-        <div className="mt-[20px] flex">
+      <main className="px-4 sm:px-6 lg:px-[100px]">
+        <div className="mt-[20px] flex flex-col lg:flex-row gap-6">
           {/* Seção da Esquerda */}
-          <div className="flex flex-col gap-[20px]">
+          <div className="flex flex-col gap-[20px] w-full lg:w-auto">
             {/* Seção do Sobre */}
             <div 
-              className="flex flex-col w-[350px] min-h-[250px] p-[20px] rounded-[10px]"
+              className="flex flex-col w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px]"
               style={{ backgroundColor: profileSettings.aboutBackgroundColor }}
             >
-              <p className="text-[30px] font-bold" style={{ color: profileSettings.aboutTitleColor }}>Sobre</p>
-              <p className="text-[16px]" style={{ color: profileSettings.aboutTextColor }}>
+              <p className="text-[24px] sm:text-[28px] lg:text-[30px] font-bold" style={{ color: profileSettings.aboutTitleColor }}>Sobre</p>
+              <p className="text-[14px] sm:text-[15px] lg:text-[16px]" style={{ color: profileSettings.aboutTextColor }}>
                 {profileSettings.about || "Adicione uma descrição sobre você..."}
               </p>
             </div>
             {/* Seção de Suas Fandoms */}
-            <div className="flex flex-col bg-red-500 w-[350px] min-h-[250px] p-[20px] rounded-[10px] blur-sm">
+            <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px] blur-sm">
               <p>Suas Fandoms</p>
             </div>
             {/* Seção de Amigos */}
-            <div className="flex flex-col bg-red-500 w-[350px] min-h-[250px] p-[20px] rounded-[10px]">
+            <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px]">
               <p>Amigos</p>
             </div>
           </div>
           {/* Seção da Direita */}
-          <div>
+          <div className="w-full lg:w-auto lg:flex-1">
             {/* Seção 1 */}
-            <div className="flex">
-              <div>
-                <p>Nível de Fã</p>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="flex-1">
+                <p className="text-lg font-semibold">Nível de Fã</p>
               </div>
-              <div>
-                <p>Atividade</p>
+              <div className="flex-1">
+                <p className="text-lg font-semibold">Atividade</p>
               </div>
             </div>
             {/* Seção 2 */}
-            <div>
-              <p>Publicações</p>
+            <div className="mb-6">
+              <p className="text-lg font-semibold">Publicações</p>
             </div>
             {/* Seção 3 */}
             <div>
-              <p>Fandoms Populares</p>
+              <p className="text-lg font-semibold">Fandoms Populares</p>
             </div>
           </div>
         </div>
@@ -745,13 +746,13 @@ export default function ProfilePage() {
 
       {/* Modal de Edição de Perfil */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-[500px] max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-[500px] max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Editar Perfil</h2>
+              <h2 className="text-xl sm:text-2xl font-bold">Editar Perfil</h2>
               <button 
                 onClick={() => setShowEditModal(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 p-1"
               >
                 ✕
               </button>
@@ -938,7 +939,7 @@ export default function ProfilePage() {
               )}
 
               {/* Botões */}
-              <div className="flex gap-2 pt-4">
+              <div className="flex flex-col sm:flex-row gap-2 pt-4">
                 <button
                   onClick={handleUpdateProfile}
                   disabled={loading}
