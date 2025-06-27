@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { User } from "@supabase/supabase-js";
 
 // Interfaces para os dados
 interface Fandom {
@@ -51,7 +50,6 @@ export default function EditCharacterPage() {
   const characterId = params.characterId as string;
 
   // Estados para gerenciar dados
-  const [user, setUser] = useState<User | null>(null);
   const [fandom, setFandom] = useState<Fandom | null>(null);
   const [fandomPage, setFandomPage] = useState<FandomPage | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);
@@ -82,7 +80,6 @@ export default function EditCharacterPage() {
     try {
       // Verifica se o usuário está logado
       const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
 
       if (!user) {
         throw new Error('Usuário não autenticado');
@@ -136,9 +133,10 @@ export default function EditCharacterPage() {
 
       // Extrai dados customizados
       const customData = characterData.custom_data || {};
+      console.log('Dados customizados carregados:', customData);
 
       // Preenche o formulário com os dados atuais
-      setFormData({
+      const formDataToSet = {
         title: characterData.item_title,
         description: characterData.item_description,
         image_url: characterData.item_image_url || '',
@@ -153,7 +151,10 @@ export default function EditCharacterPage() {
         curiosidades: customData.curiosidades || '',
         quote: customData.quote || '',
         quoteSource: customData.quoteSource || ''
-      });
+      };
+
+      console.log('Formulário preenchido com:', formDataToSet);
+      setFormData(formDataToSet);
 
     } catch (error: unknown) {
       console.error('Erro ao carregar dados:', error);
