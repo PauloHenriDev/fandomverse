@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
+import ImageUpload from './ImageUpload';
 
 interface AddCharacterModalProps {
   isOpen: boolean;
@@ -89,108 +90,106 @@ export default function AddCharacterModal({
     }));
   };
 
+  const handleImageUploaded = (imageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      image_url: imageUrl
+    }));
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-800">Adicionar Personagem</h2>
-          <button 
+          <h2 className="text-xl font-bold text-gray-800">Adicionar Personagem</h2>
+          <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 p-1"
+            className="text-gray-500 hover:text-gray-700"
           >
-            ✕
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
-        {message && (
-          <div className={`p-3 rounded-lg mb-4 text-sm sm:text-base ${
-            message.includes('Erro') 
-              ? 'bg-red-100 text-red-700 border border-red-200' 
-              : 'bg-green-100 text-green-700 border border-green-200'
-          }`}>
-            {message}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Nome do Personagem */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Nome do Personagem *
             </label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#926DF6]"
               required
-              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent text-sm sm:text-base"
-              placeholder="Digite o nome do personagem"
             />
           </div>
 
+          {/* Descrição */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-              Descrição *
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Descrição
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              required
               rows={3}
-              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none text-sm sm:text-base"
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#926DF6]"
               placeholder="Descreva o personagem..."
             />
           </div>
 
+          {/* Upload de Imagem */}
+          <ImageUpload
+            currentImageUrl={formData.image_url}
+            onImageUploaded={handleImageUploaded}
+            bucketName="character-images"
+            folderName="characters"
+          />
+
+          {/* Cor do Personagem */}
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-              URL da Imagem (opcional)
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cor do Personagem
             </label>
             <input
-              type="url"
-              value={formData.image_url}
-              onChange={(e) => handleInputChange('image_url', e.target.value)}
-              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent text-sm sm:text-base"
-              placeholder="https://exemplo.com/imagem.jpg"
+              type="color"
+              value={formData.color}
+              onChange={(e) => handleInputChange('color', e.target.value)}
+              className="w-full h-10 border border-gray-300 rounded-md cursor-pointer"
             />
           </div>
 
-          <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-              Cor do Card
-            </label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="color"
-                value={formData.color}
-                onChange={(e) => handleInputChange('color', e.target.value)}
-                className="w-10 h-8 sm:w-12 sm:h-10 border border-gray-300 rounded"
-              />
-              <input
-                type="text"
-                value={formData.color}
-                onChange={(e) => handleInputChange('color', e.target.value)}
-                className="flex-1 p-2 border border-gray-300 rounded text-xs sm:text-sm"
-              />
+          {/* Mensagem */}
+          {message && (
+            <div className={`p-3 rounded-md text-sm ${
+              message.includes('sucesso') 
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-red-100 text-red-700'
+            }`}>
+              {message}
             </div>
-          </div>
+          )}
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-[#926DF6] text-white py-2 sm:py-2 px-4 rounded-lg hover:bg-[#A98AF8] transition-colors disabled:opacity-50 font-medium text-sm sm:text-base"
-            >
-              {loading ? 'Adicionando...' : 'Adicionar Personagem'}
-            </button>
-            
+          {/* Botões */}
+          <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-500 text-white py-2 sm:py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors font-medium text-sm sm:text-base"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-4 py-2 bg-[#926DF6] text-white rounded-md hover:bg-[#A98AF8] transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Adicionando...' : 'Adicionar Personagem'}
             </button>
           </div>
         </form>
