@@ -1339,7 +1339,6 @@ export default function CharacterPage() {
         .select('*')
         .eq('id', characterId)
         .eq('item_type', 'character')
-        .eq('is_active', true)
         .single();
 
       if (characterError) {

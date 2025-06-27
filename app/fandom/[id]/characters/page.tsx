@@ -259,8 +259,7 @@ export default function CharactersPage() {
                     description={character.item_description}
                     image_url={character.item_image_url}
                     color={character.item_color}
-                    isEditable={user?.id === fandom?.creator_id}
-                    showViewMoreButton={false}
+                    fandomId={fandomId}
                   />
                 </div>
               ))}

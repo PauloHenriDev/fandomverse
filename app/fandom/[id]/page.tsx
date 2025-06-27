@@ -239,7 +239,6 @@ export default function FandomPage() {
                         color={item.item_color}
                         isEditable={user?.id === fandom?.creator_id}
                         fandomId={fandomId}
-                        showViewMoreButton={true}
                       />
                     </div>
                   ))}
