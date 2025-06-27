@@ -57,6 +57,21 @@ export default function Home() {
           )}
         </CardGrid>
       </div>
+      <div className="
+      pl-[150px] pr-[150px] 
+      ">
+        <p className="text-[40px] text-white font-bold">Personagens</p>
+        <div>
+          Carrossel
+          <div className="bg-red-500 w-full h-fit flex">
+            <div className="flex gap-[20px]">
+              <p>card de personagem</p>
+              <p>card de personagem</p>
+              <p>card de personagem</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

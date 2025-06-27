@@ -10,7 +10,7 @@ interface PageSectionProps {
 export default function PageSection({ 
   children, 
   className = "",
-  padding = "pl-[250px] pr-[250px]",
+  padding = "pl-[15px] pr-[15px]",
   marginTop = "mt-[10px]"
 }: PageSectionProps) {
   return (
