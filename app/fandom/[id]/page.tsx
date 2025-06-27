@@ -173,13 +173,13 @@ export default function FandomPage() {
     const allCharacters = charactersSection ? items[charactersSection.id] || [] : [];
     
     if (categoryId === 'all') {
-      // Mostra todos os personagens (máximo 8)
-      setFilteredCharacters(allCharacters.slice(0, 8));
+      // Mostra todos os personagens (máximo 10)
+      setFilteredCharacters(allCharacters.slice(0, 10));
     } else {
       // Filtra por categoria específica
       const filtered = allCharacters.filter(character => 
         character.custom_data?.categories?.includes(categoryId)
-      ).slice(0, 8); // Máximo 8 personagens
+      ).slice(0, 10); // Máximo 10 personagens
       setFilteredCharacters(filtered);
     }
   }, [sections, items]);
