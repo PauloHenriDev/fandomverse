@@ -207,7 +207,7 @@ export default function CharactersPage() {
               </p>
             </div>
 
-            <CardGrid className="gap-[16px] md:gap-[24px] lg:gap-[5px]">
+            <CardGrid className="gap-[16px] md:gap-[24px] lg:gap-[30px]">
               {characters.map((character) => (
                 <CharacterCard
                   key={character.id}
