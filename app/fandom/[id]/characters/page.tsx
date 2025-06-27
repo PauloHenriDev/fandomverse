@@ -5,7 +5,6 @@ import { supabase } from "../../../../lib/supabase";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import CharacterCard from "@/components/ui/CharacterCard";
-import { User } from "@supabase/supabase-js";
 import FandomHeader from "@/components/ui/FandomHeader";
 import { CardGrid } from "@/components/templates";
 
@@ -52,7 +51,6 @@ export default function CharactersPage() {
   const fandomId = params.id as string;
 
   // Estados para gerenciar dados
-  const [user, setUser] = useState<User | null>(null);
   const [fandom, setFandom] = useState<Fandom | null>(null);
   const [fandomPage, setFandomPage] = useState<FandomPage | null>(null);
   const [characters, setCharacters] = useState<SectionItem[]>([]);
@@ -62,10 +60,6 @@ export default function CharactersPage() {
   // Hook que executa quando o componente é montado
   const loadCharacters = useCallback(async () => {
     try {
-      // Verifica se o usuário está logado (opcional)
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-
       // Carrega dados da fandom
       const { data: fandomData, error: fandomError } = await supabase
         .from('fandoms')
@@ -180,80 +174,85 @@ export default function CharactersPage() {
   }
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{ backgroundColor: fandomPage.background_color }}
-    >
-      {/* Header com estilo do Header.tsx global */}
+    <div className="min-h-screen bg-[#875CF5]">
+      {/* Header com dados reais da fandom */}
       <FandomHeader
         fandomName={fandom.name}
         fandomDescription={fandom.description}
-        fandomId={fandomId}
+        fandomId={fandom.id}
         creatorId={fandom.creator_id}
       />
 
       {/* Conteúdo da página */}
-      <div className="max-w-7xl mx-auto px-[16px] sm:px-[24px] lg:px-[32px] py-[24px] sm:py-[32px]">
-
-        {/* Lista de personagens */}
-        {characters.length > 0 ? (
-          <div className="space-y-6 sm:space-y-8">
-            <div className="text-center">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-                Todos os Personagens
-              </h2>
-              <p className="text-white opacity-90 text-sm sm:text-base mb-4">
-                Clique em um personagem para ver mais detalhes
-              </p>
-              {/* Botão de Gerenciar Filtros */}
+      <main>
+        {/* Seções */}
+        <div className="pl-[150px] pr-[150px]">
+          {/* Seção de Personagens */}
+          <div className="">
+            <div className="flex justify-between items-center mb-6">
+              <p className="text-[50px] text-white font-bold">Todos os Personagens</p>
+            </div>
+            
+            {/* Cards usando CardGrid */}
+            <div>
+              {/* Grid de Personagens */}
+              <CardGrid className="gap-[20px]">
+                {characters.length > 0 ? (
+                  characters.map((character) => (
+                    <CharacterCard
+                      key={character.id}
+                      id={character.id}
+                      title={character.item_title}
+                      description={character.item_description}
+                      image_url={character.item_image_url}
+                      color={character.item_color}
+                      fandomId={fandomId}
+                    />
+                  ))
+                ) : (
+                  // Cards de exemplo quando não há dados reais
+                  <>
+                    <CharacterCard
+                      id="1"
+                      title="Personagem 1"
+                      description="Descrição do personagem 1"
+                      color="#926DF6"
+                    />
+                    <CharacterCard
+                      id="2"
+                      title="Personagem 2"
+                      description="Descrição do personagem 2"
+                      color="#926DF6"
+                    />
+                    <CharacterCard
+                      id="3"
+                      title="Personagem 3"
+                      description="Descrição do personagem 3"
+                      color="#926DF6"
+                    />
+                    <CharacterCard
+                      id="4"
+                      title="Personagem 4"
+                      description="Descrição do personagem 4"
+                      color="#926DF6"
+                    />
+                  </>
+                )}
+              </CardGrid>
+            </div>
+            
+            {/* Botão de voltar para página principal */}
+            <div className="flex justify-center">
               <Link
-                href={`/fandom/${fandomId}/manage-filters`}
-                className="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                href={`/fandom/${fandomId}`}
+                className="bg-red-500 p-[10px] rounded-[10px] text-white hover:bg-red-600 transition-colors mt-[15px]"
               >
-                Gerenciar Filtros
+                Voltar para Página Principal
               </Link>
             </div>
-
-            <CardGrid className="gap-[16px] md:gap-[24px] lg:gap-[30px]">
-              {characters.map((character) => (
-                <CharacterCard
-                  key={character.id}
-                  id={character.id}
-                  title={character.item_title}
-                  description={character.item_description}
-                  image_url={character.item_image_url}
-                  color={character.item_color}
-                  fandomId={fandomId}
-                />
-              ))}
-            </CardGrid>
           </div>
-        ) : (
-          <div className="text-center py-12 sm:py-16">
-            <div className="bg-white rounded-lg shadow-sm p-6 sm:p-8 max-w-md mx-auto">
-              <div className="text-gray-400 mb-4">
-                <svg className="w-16 h-16 sm:w-20 sm:h-20 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
-                Nenhum personagem encontrado
-              </h3>
-              <p className="text-gray-600 text-sm sm:text-base mb-4">
-                Esta fandom ainda não possui personagens cadastrados.
-              </p>
-              {user?.id === fandom?.creator_id && (
-                <Link
-                  href={`/fandom/${fandomId}/edit`}
-                  className="bg-[#926DF6] text-white px-4 py-2 rounded-lg hover:bg-[#A98AF8] transition-colors text-sm sm:text-base"
-                >
-                  Adicionar Primeiro Personagem
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      </main>
     </div>
   );
 } 
