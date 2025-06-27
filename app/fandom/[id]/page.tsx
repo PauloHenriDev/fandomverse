@@ -97,6 +97,7 @@ export default function FandomPage() {
   // Função para carregar filtros do banco de dados
   const loadFilters = useCallback(async () => {
     try {
+      console.log('loadFilters chamada - fandomPage:', fandomPage?.id);
       if (!fandomPage) return;
 
       // Carregar seção de personagens
@@ -125,33 +126,34 @@ export default function FandomPage() {
         return;
       }
 
+      console.log('Filtros carregados do banco:', filtersData);
+
       // Converter filtros do banco para o formato da interface
-      const dbCategories: Category[] = [
-        { id: 'all', name: 'Todos', isActive: true }
+      const dbCategories: Category[] = [];
+
+      // Adiciona filtros do banco de dados (excluindo qualquer filtro com valor 'all')
+      filtersData?.forEach(filter => {
+        if (filter.filter_value !== 'all') {
+          dbCategories.push({
+            id: filter.filter_value,
+            name: filter.filter_label,
+            isActive: false
+          });
+        }
+      });
+
+      console.log('Categorias do banco processadas:', dbCategories);
+
+      // Cria array final com "Todos" + filtros do banco
+      const finalCategories: Category[] = [
+        { id: 'all', name: 'Todos', isActive: true },
+        ...dbCategories
       ];
 
-      // Adiciona filtros do banco de dados
-      filtersData?.forEach(filter => {
-        dbCategories.push({
-          id: filter.filter_value,
-          name: filter.filter_label,
-          isActive: false
-        });
-      });
+      console.log('Categorias finais:', finalCategories);
 
-      // Atualiza as categorias apenas se forem diferentes das atuais
-      setCategories(prevCategories => {
-        // Se as categorias já estão carregadas e são as mesmas, não atualiza
-        if (prevCategories.length === dbCategories.length) {
-          const hasSameCategories = prevCategories.every((cat, index) => 
-            cat.id === dbCategories[index].id && cat.name === dbCategories[index].name
-          );
-          if (hasSameCategories) {
-            return prevCategories;
-          }
-        }
-        return dbCategories;
-      });
+      // Atualiza as categorias
+      setCategories(finalCategories);
     } catch (error) {
       console.error('Erro ao carregar filtros:', error);
     }
