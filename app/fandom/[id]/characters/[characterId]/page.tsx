@@ -37,6 +37,1078 @@ interface Character {
   custom_data?: Record<string, string>;
 }
 
+// Modal para editar informações da sidebar
+function SidebarEditModal({ 
+  isOpen, 
+  onClose, 
+  character, 
+  onSave 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  character: Character | null; 
+  onSave: (data: {
+    item_title: string;
+    item_description: string;
+    item_image_url: string | null;
+    item_color: string;
+  }) => void; 
+}) {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    image_url: '',
+    color: '#926DF6'
+  });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  // Inicializa o formulário quando o modal abre
+  useEffect(() => {
+    if (character && isOpen) {
+      setFormData({
+        title: character.item_title,
+        description: character.item_description,
+        image_url: character.item_image_url || '',
+        color: character.item_color
+      });
+    }
+  }, [character, isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!character) return;
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const { error } = await supabase
+        .from('section_items')
+        .update({
+          item_title: formData.title,
+          item_description: formData.description,
+          item_image_url: formData.image_url || null,
+          item_color: formData.color
+        })
+        .eq('id', character.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setMessage('Informações atualizadas com sucesso!');
+      
+      // Chama a função de callback para atualizar os dados
+      onSave({
+        item_title: formData.title,
+        item_description: formData.description,
+        item_image_url: formData.image_url || null,
+        item_color: formData.color
+      });
+
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      setMessage('Erro ao atualizar: ' + errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800">Editar Informações Básicas</h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        {message && (
+          <div className={`p-3 rounded-lg mb-4 text-sm sm:text-base ${
+            message.includes('Erro') 
+              ? 'bg-red-100 text-red-700 border border-red-200' 
+              : 'bg-green-100 text-green-700 border border-green-200'
+          }`}>
+            {message}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+              Nome do Personagem *
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => handleInputChange('title', e.target.value)}
+              required
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent text-sm sm:text-base"
+              placeholder="Digite o nome do personagem"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+              Descrição Curta (Sidebar) *
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              required
+              rows={3}
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none text-sm sm:text-base"
+              placeholder="Descrição curta para a sidebar..."
+            />
+            <p className="text-xs text-gray-500 mt-1">Esta descrição aparece na sidebar e nos cards de listagem.</p>
+          </div>
+
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+              URL da Imagem (opcional)
+            </label>
+            <input
+              type="url"
+              value={formData.image_url}
+              onChange={(e) => handleInputChange('image_url', e.target.value)}
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent text-sm sm:text-base"
+              placeholder="https://exemplo.com/imagem.jpg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+              Cor do Card
+            </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="color"
+                value={formData.color}
+                onChange={(e) => handleInputChange('color', e.target.value)}
+                className="w-10 h-8 sm:w-12 sm:h-10 border border-gray-300 rounded"
+              />
+              <input
+                type="text"
+                value={formData.color}
+                onChange={(e) => handleInputChange('color', e.target.value)}
+                className="flex-1 p-2 border border-gray-300 rounded text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-[#926DF6] text-white py-2 sm:py-2 px-4 rounded-lg hover:bg-[#A98AF8] transition-colors disabled:opacity-50 font-medium text-sm sm:text-base"
+            >
+              {loading ? 'Salvando...' : 'Salvar Alterações'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-gray-500 text-white py-2 sm:py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors font-medium text-sm sm:text-base"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Modal para editar informações da sidebar (seções Informações e Aparência)
+function SidebarInfoEditModal({ 
+  isOpen, 
+  onClose, 
+  character, 
+  onSave 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  character: Character | null; 
+  onSave: (data: {
+    item_title: string;
+    item_color: string;
+    item_order: number;
+    is_active: boolean;
+  }) => void; 
+}) {
+  const [formData, setFormData] = useState({
+    title: '',
+    color: '#926DF6',
+    order: 1,
+    is_active: true
+  });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  // Inicializa o formulário quando o modal abre
+  useEffect(() => {
+    if (character && isOpen) {
+      setFormData({
+        title: character.item_title,
+        color: character.item_color,
+        order: character.item_order,
+        is_active: character.is_active
+      });
+    }
+  }, [character, isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!character) return;
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const { error } = await supabase
+        .from('section_items')
+        .update({
+          item_title: formData.title,
+          item_color: formData.color,
+          item_order: formData.order,
+          is_active: formData.is_active
+        })
+        .eq('id', character.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setMessage('Informações da sidebar atualizadas com sucesso!');
+      
+      // Chama a função de callback para atualizar os dados
+      onSave({
+        item_title: formData.title,
+        item_color: formData.color,
+        item_order: formData.order,
+        is_active: formData.is_active
+      });
+
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      setMessage('Erro ao atualizar: ' + errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string | number | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800">Editar Informações da Sidebar</h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        {message && (
+          <div className={`p-3 rounded-lg mb-4 text-sm sm:text-base ${
+            message.includes('Erro') 
+              ? 'bg-red-100 text-red-700 border border-red-200' 
+              : 'bg-green-100 text-green-700 border border-green-200'
+          }`}>
+            {message}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+              Nome do Personagem *
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => handleInputChange('title', e.target.value)}
+              required
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent text-sm sm:text-base"
+              placeholder="Digite o nome do personagem"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+              Cor do Card
+            </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="color"
+                value={formData.color}
+                onChange={(e) => handleInputChange('color', e.target.value)}
+                className="w-10 h-8 sm:w-12 sm:h-10 border border-gray-300 rounded"
+              />
+              <input
+                type="text"
+                value={formData.color}
+                onChange={(e) => handleInputChange('color', e.target.value)}
+                className="flex-1 p-2 border border-gray-300 rounded text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+              Ordem de Exibição
+            </label>
+            <input
+              type="number"
+              value={formData.order}
+              onChange={(e) => handleInputChange('order', parseInt(e.target.value) || 1)}
+              min="1"
+              className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent text-sm sm:text-base"
+              placeholder="1"
+            />
+            <p className="text-xs text-gray-500 mt-1">Define a ordem em que o personagem aparece na lista.</p>
+          </div>
+
+          <div>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.is_active}
+                onChange={(e) => handleInputChange('is_active', e.target.checked)}
+                className="rounded border-gray-300 text-[#926DF6] focus:ring-[#926DF6]"
+              />
+              <span className="text-xs sm:text-sm font-medium text-gray-700">Personagem Ativo</span>
+            </label>
+            <p className="text-xs text-gray-500 mt-1">Personagens inativos não aparecem nas listagens.</p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-[#926DF6] text-white py-2 sm:py-2 px-4 rounded-lg hover:bg-[#A98AF8] transition-colors disabled:opacity-50 font-medium text-sm sm:text-base"
+            >
+              {loading ? 'Salvando...' : 'Salvar Informações'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-gray-500 text-white py-2 sm:py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors font-medium text-sm sm:text-base"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Modal para editar conteúdo principal da ficha
+function MainContentEditModal({ 
+  isOpen, 
+  onClose, 
+  character, 
+  characterData,
+  onSave 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  character: Character | null; 
+  characterData: Record<string, string>;
+  onSave: (data: Record<string, string>) => void; 
+}) {
+  const [formData, setFormData] = useState({
+    descricaoDetalhada: '',
+    personalidade: '',
+    aparencia: '',
+    habilidades: '',
+    equipamentos: '',
+    background: '',
+    relacionamentos: '',
+    curiosidades: '',
+    quote: '',
+    quoteSource: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  // Inicializa o formulário quando o modal abre
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        descricaoDetalhada: characterData.descricaoDetalhada || '',
+        personalidade: characterData.personalidade || '',
+        aparencia: characterData.aparencia || '',
+        habilidades: characterData.habilidades || '',
+        equipamentos: characterData.equipamentos || '',
+        background: characterData.background || '',
+        relacionamentos: characterData.relacionamentos || '',
+        curiosidades: characterData.curiosidades || '',
+        quote: characterData.quote || '',
+        quoteSource: characterData.quoteSource || ''
+      });
+    }
+  }, [characterData, isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!character) return;
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const { error } = await supabase
+        .from('section_items')
+        .update({
+          custom_data: formData
+        })
+        .eq('id', character.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setMessage('Conteúdo da ficha atualizado com sucesso!');
+      
+      // Chama a função de callback para atualizar os dados
+      onSave(formData);
+
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      setMessage('Erro ao atualizar: ' + errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800">Editar Conteúdo da Ficha</h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        {message && (
+          <div className={`p-3 rounded-lg mb-4 text-sm sm:text-base ${
+            message.includes('Erro') 
+              ? 'bg-red-100 text-red-700 border border-red-200' 
+              : 'bg-green-100 text-green-700 border border-green-200'
+          }`}>
+            {message}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Descrição Detalhada (Ficha Principal)
+            </label>
+            <textarea
+              value={formData.descricaoDetalhada}
+              onChange={(e) => handleInputChange('descricaoDetalhada', e.target.value)}
+              rows={4}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
+              placeholder="Descrição detalhada que aparece na seção principal da ficha..."
+            />
+            <p className="text-xs text-gray-500 mt-1">Esta descrição aparece na seção principal da ficha, separada da descrição curta da sidebar.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Personalidade
+              </label>
+              <textarea
+                value={formData.personalidade}
+                onChange={(e) => handleInputChange('personalidade', e.target.value)}
+                rows={3}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
+                placeholder="Descreva a personalidade do personagem..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Aparência
+              </label>
+              <textarea
+                value={formData.aparencia}
+                onChange={(e) => handleInputChange('aparencia', e.target.value)}
+                rows={3}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
+                placeholder="Descreva as características físicas..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Habilidades e Poderes
+              </label>
+              <textarea
+                value={formData.habilidades}
+                onChange={(e) => handleInputChange('habilidades', e.target.value)}
+                rows={3}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
+                placeholder="Liste as habilidades especiais..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Equipamentos
+              </label>
+              <textarea
+                value={formData.equipamentos}
+                onChange={(e) => handleInputChange('equipamentos', e.target.value)}
+                rows={3}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
+                placeholder="Descreva armas, armaduras, itens..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Background
+              </label>
+              <textarea
+                value={formData.background}
+                onChange={(e) => handleInputChange('background', e.target.value)}
+                rows={3}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
+                placeholder="Conte a história de fundo..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Relacionamentos
+              </label>
+              <textarea
+                value={formData.relacionamentos}
+                onChange={(e) => handleInputChange('relacionamentos', e.target.value)}
+                rows={3}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
+                placeholder="Descreva família, amigos, inimigos..."
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Curiosidades
+            </label>
+            <textarea
+              value={formData.curiosidades}
+              onChange={(e) => handleInputChange('curiosidades', e.target.value)}
+              rows={3}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
+              placeholder="Adicione fatos interessantes e curiosidades..."
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Citação Marcante
+              </label>
+              <textarea
+                value={formData.quote}
+                onChange={(e) => handleInputChange('quote', e.target.value)}
+                rows={2}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
+                placeholder="Uma citação marcante do personagem..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Fonte da Citação
+              </label>
+              <input
+                type="text"
+                value={formData.quoteSource}
+                onChange={(e) => handleInputChange('quoteSource', e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                placeholder="De onde vem a citação..."
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-[#926DF6] text-white py-3 px-4 rounded-lg hover:bg-[#A98AF8] transition-colors disabled:opacity-50 font-medium"
+            >
+              {loading ? 'Salvando...' : 'Salvar Conteúdo da Ficha'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-gray-500 text-white py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors font-medium"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Modal para editar sidebar com campos customizáveis
+function SidebarCustomEditModal({ 
+  isOpen, 
+  onClose, 
+  character, 
+  characterData,
+  onSave 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  character: Character | null; 
+  characterData: Record<string, string>;
+  onSave: (data: Record<string, string>) => void; 
+}) {
+  const [formData, setFormData] = useState({
+    nome: '',
+    fandom: '',
+    tipo: 'Personagem',
+    status: 'Ativo',
+    raca: '',
+    idade: '',
+    altura: '',
+    peso: '',
+    classe: '',
+    nivel: '',
+    alinhamento: '',
+    statusVida: 'Vivo',
+    corCard: '#926DF6',
+    ordem: 1
+  });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+
+  // Inicializa o formulário quando o modal abre
+  useEffect(() => {
+    if (character && isOpen) {
+      setFormData({
+        nome: character.item_title,
+        fandom: characterData.fandom || '',
+        tipo: characterData.tipo || 'Personagem',
+        status: character.is_active ? 'Ativo' : 'Inativo',
+        raca: characterData.raca || '',
+        idade: characterData.idade || '',
+        altura: characterData.altura || '',
+        peso: characterData.peso || '',
+        classe: characterData.classe || '',
+        nivel: characterData.nivel || '',
+        alinhamento: characterData.alinhamento || '',
+        statusVida: characterData.statusVida || 'Vivo',
+        corCard: character.item_color,
+        ordem: character.item_order
+      });
+    }
+  }, [character, characterData, isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!character) return;
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      // Prepara os dados customizados da sidebar
+      const sidebarData = {
+        fandom: formData.fandom,
+        tipo: formData.tipo,
+        raca: formData.raca,
+        idade: formData.idade,
+        altura: formData.altura,
+        peso: formData.peso,
+        classe: formData.classe,
+        nivel: formData.nivel,
+        alinhamento: formData.alinhamento,
+        statusVida: formData.statusVida
+      };
+
+      const { error } = await supabase
+        .from('section_items')
+        .update({
+          item_title: formData.nome,
+          item_color: formData.corCard,
+          item_order: formData.ordem,
+          is_active: formData.status === 'Ativo',
+          custom_data: {
+            ...characterData,
+            ...sidebarData
+          }
+        })
+        .eq('id', character.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setMessage('Sidebar atualizada com sucesso!');
+      
+      // Chama a função de callback para atualizar os dados
+      onSave({
+        ...characterData,
+        ...sidebarData
+      });
+
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      setMessage('Erro ao atualizar: ' + errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800">Editar Sidebar do Personagem</h2>
+          <button 
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        {message && (
+          <div className={`p-3 rounded-lg mb-4 text-sm sm:text-base ${
+            message.includes('Erro') 
+              ? 'bg-red-100 text-red-700 border border-red-200' 
+              : 'bg-green-100 text-green-700 border border-green-200'
+          }`}>
+            {message}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Seção: Informações Básicas */}
+          <div className="border-b border-gray-200 pb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Informações Básicas</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome do Personagem *
+                </label>
+                <input
+                  type="text"
+                  value={formData.nome}
+                  onChange={(e) => handleInputChange('nome', e.target.value)}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Nome do personagem"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fandom
+                </label>
+                <input
+                  type="text"
+                  value={formData.fandom}
+                  onChange={(e) => handleInputChange('fandom', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Nome da fandom"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tipo
+                </label>
+                <select
+                  value={formData.tipo}
+                  onChange={(e) => handleInputChange('tipo', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                >
+                  <option value="Personagem">Personagem</option>
+                  <option value="NPC">NPC</option>
+                  <option value="Vilão">Vilão</option>
+                  <option value="Aliado">Aliado</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => handleInputChange('status', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                >
+                  <option value="Ativo">Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Seção: Características */}
+          <div className="border-b border-gray-200 pb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Características</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Raça
+                </label>
+                <input
+                  type="text"
+                  value={formData.raca}
+                  onChange={(e) => handleInputChange('raca', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: Humano, Elfo, Orc"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Idade
+                </label>
+                <input
+                  type="text"
+                  value={formData.idade}
+                  onChange={(e) => handleInputChange('idade', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: 25 anos, 150 anos"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Altura
+                </label>
+                <input
+                  type="text"
+                  value={formData.altura}
+                  onChange={(e) => handleInputChange('altura', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: 1.75m, 6'2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Peso
+                </label>
+                <input
+                  type="text"
+                  value={formData.peso}
+                  onChange={(e) => handleInputChange('peso', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: 70kg, 180lbs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Seção: RPG/Game */}
+          <div className="border-b border-gray-200 pb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">RPG/Game</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Classe
+                </label>
+                <input
+                  type="text"
+                  value={formData.classe}
+                  onChange={(e) => handleInputChange('classe', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: Guerreiro, Mago, Ladino"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nível
+                </label>
+                <input
+                  type="text"
+                  value={formData.nivel}
+                  onChange={(e) => handleInputChange('nivel', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: 15, Mestre"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Alinhamento
+                </label>
+                <select
+                  value={formData.alinhamento}
+                  onChange={(e) => handleInputChange('alinhamento', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                >
+                  <option value="">Selecione...</option>
+                  <option value="Leal e Bom">Leal e Bom</option>
+                  <option value="Neutro e Bom">Neutro e Bom</option>
+                  <option value="Caótico e Bom">Caótico e Bom</option>
+                  <option value="Leal e Neutro">Leal e Neutro</option>
+                  <option value="Neutro">Neutro</option>
+                  <option value="Caótico e Neutro">Caótico e Neutro</option>
+                  <option value="Leal e Mau">Leal e Mau</option>
+                  <option value="Neutro e Mau">Neutro e Mau</option>
+                  <option value="Caótico e Mau">Caótico e Mau</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status de Vida
+                </label>
+                <select
+                  value={formData.statusVida}
+                  onChange={(e) => handleInputChange('statusVida', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                >
+                  <option value="Vivo">Vivo</option>
+                  <option value="Morto">Morto</option>
+                  <option value="Desaparecido">Desaparecido</option>
+                  <option value="Inconsciente">Inconsciente</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Seção: Aparência */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Aparência</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cor do Card
+                </label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="color"
+                    value={formData.corCard}
+                    onChange={(e) => handleInputChange('corCard', e.target.value)}
+                    className="w-12 h-10 border border-gray-300 rounded"
+                  />
+                  <input
+                    type="text"
+                    value={formData.corCard}
+                    onChange={(e) => handleInputChange('corCard', e.target.value)}
+                    className="flex-1 p-3 border border-gray-300 rounded"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ordem de Exibição
+                </label>
+                <input
+                  type="number"
+                  value={formData.ordem}
+                  onChange={(e) => handleInputChange('ordem', parseInt(e.target.value) || 1)}
+                  min="1"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="1"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-[#926DF6] text-white py-3 px-4 rounded-lg hover:bg-[#A98AF8] transition-colors disabled:opacity-50 font-medium"
+            >
+              {loading ? 'Salvando...' : 'Salvar Sidebar'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-gray-500 text-white py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors font-medium"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Página dedicada para exibir um personagem específico
  * 
@@ -58,6 +1130,18 @@ export default function CharacterPage() {
   const [characterData, setCharacterData] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Estado para o modal de edição da sidebar
+  const [showSidebarEditModal, setShowSidebarEditModal] = useState(false);
+
+  // Estado para o modal de edição do conteúdo principal
+  const [showMainContentEditModal, setShowMainContentEditModal] = useState(false);
+
+  // Estado para o modal de edição das informações da sidebar
+  const [showSidebarInfoEditModal, setShowSidebarInfoEditModal] = useState(false);
+
+  // Estado para o modal de edição da sidebar com campos customizáveis
+  const [showSidebarCustomEditModal, setShowSidebarCustomEditModal] = useState(false);
 
   // Hook que executa quando o componente é montado
   const loadCharacter = useCallback(async () => {
@@ -122,6 +1206,62 @@ export default function CharacterPage() {
   useEffect(() => {
     loadCharacter();
   }, [loadCharacter]);
+
+  // Função para atualizar dados do personagem após edição da sidebar
+  const handleSidebarEditSave = (updatedData: {
+    item_title: string;
+    item_description: string;
+    item_image_url: string | null;
+    item_color: string;
+  }) => {
+    if (character) {
+      setCharacter({
+        ...character,
+        item_title: updatedData.item_title,
+        item_description: updatedData.item_description,
+        item_image_url: updatedData.item_image_url || '',
+        item_color: updatedData.item_color
+      });
+    }
+  };
+
+  // Função para atualizar dados do personagem após edição do conteúdo principal
+  const handleMainContentEditSave = (updatedData: Record<string, string>) => {
+    setCharacterData(updatedData);
+  };
+
+  // Função para atualizar dados do personagem após edição das informações da sidebar
+  const handleSidebarInfoEditSave = (updatedData: {
+    item_title: string;
+    item_color: string;
+    item_order: number;
+    is_active: boolean;
+  }) => {
+    if (character) {
+      setCharacter({
+        ...character,
+        item_title: updatedData.item_title,
+        item_color: updatedData.item_color,
+        item_order: updatedData.item_order,
+        is_active: updatedData.is_active
+      });
+    }
+  };
+
+  // Função para atualizar dados do personagem após edição da sidebar customizada
+  const handleSidebarCustomEditSave = (updatedData: Record<string, string>) => {
+    setCharacterData(updatedData);
+    // Também atualiza o character se necessário
+    if (character) {
+      setCharacter({
+        ...character,
+        item_title: updatedData.nome || character.item_title,
+        item_color: updatedData.corCard || character.item_color,
+        item_order: parseInt(updatedData.ordem) || character.item_order,
+        is_active: updatedData.status === 'Ativo'
+      });
+    }
+  };
 
   // Função para renderizar blocos de informação
   const infoBlock = (title: string, items: { label: string; value: string }[]) => (
@@ -265,9 +1405,20 @@ export default function CharacterPage() {
             <div className="flex flex-col gap-[8px]">
               {infoBlock("Informações", [
                 { label: "Nome:", value: character.item_title },
-                { label: "Fandom:", value: fandom.name },
-                { label: "Tipo:", value: "Personagem" },
+                { label: "Fandom:", value: characterData.fandom || fandom.name },
+                { label: "Tipo:", value: characterData.tipo || "Personagem" },
                 { label: "Status:", value: character.is_active ? "Ativo" : "Inativo" },
+                { label: "Raça:", value: characterData.raca || "Não informado" },
+                { label: "Idade:", value: characterData.idade || "Não informado" },
+                { label: "Altura:", value: characterData.altura || "Não informado" },
+                { label: "Peso:", value: characterData.peso || "Não informado" },
+              ])}
+
+              {infoBlock("RPG/Game", [
+                { label: "Classe:", value: characterData.classe || "Não informado" },
+                { label: "Nível:", value: characterData.nivel || "Não informado" },
+                { label: "Alinhamento:", value: characterData.alinhamento || "Não informado" },
+                { label: "Status de Vida:", value: characterData.statusVida || "Vivo" },
               ])}
 
               {infoBlock("Aparência", [
@@ -275,6 +1426,36 @@ export default function CharacterPage() {
                 { label: "Ordem:", value: character.item_order.toString() },
               ])}
             </div>
+
+            {/* Botões de Edição da Sidebar */}
+            {user?.id === fandom.creator_id && (
+              <div className="p-[15px] border-t border-gray-200">
+                <div className="flex gap-2 justify-center">
+                  {/* Botão para editar informações básicas (nome, descrição, imagem) */}
+                  <button
+                    onClick={() => setShowSidebarEditModal(true)}
+                    className="bg-[#926DF6] text-white p-2 rounded-full hover:bg-[#A98AF8] transition-colors shadow-lg hover:shadow-xl"
+                    title="Editar Informações Básicas"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </button>
+                  
+                  {/* Botão para editar sidebar completa com campos customizáveis */}
+                  <button
+                    onClick={() => setShowSidebarCustomEditModal(true)}
+                    className="bg-gray-600 text-white p-2 rounded-full hover:bg-gray-700 transition-colors shadow-lg hover:shadow-xl"
+                    title="Editar Sidebar Completa"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -282,22 +1463,22 @@ export default function CharacterPage() {
         <div className="flex w-full sm:w-1/2 lg:w-4/5 p-[20px] justify-center">
           <div className="flex flex-col rounded-[10px] bg-white w-[80%] p-[20px] gap-[40px] shadow-lg relative">
             
-            {/* Botão de Edição (Engrenagem) */}
+            {/* Botão de Edição do Conteúdo Principal */}
             {user?.id === fandom.creator_id && (
               <div className="absolute top-4 right-4 z-10">
-                <Link
-                  href={`/fandom/${fandomId}/characters/${characterId}/edit`}
+                {/* Botão para editar conteúdo principal (descrição detalhada) */}
+                <button
+                  onClick={() => setShowMainContentEditModal(true)}
                   className="bg-[#926DF6] text-white p-3 rounded-full hover:bg-[#A98AF8] transition-colors shadow-lg hover:shadow-xl"
-                  title="Editar Ficha do Personagem"
+                  title="Editar Conteúdo Principal"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                </Link>
+                </button>
               </div>
             )}
-            
+
             {/* Nome do Personagem */}
             <div className="flex flex-col gap-[20px]">
               <h1 className="text-[40px] font-bold text-gray-800">{character.item_title}</h1>
@@ -311,7 +1492,11 @@ export default function CharacterPage() {
               ></div>
               <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Descrição</h2>
               <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-                {character.item_description}
+                {characterData.descricaoDetalhada ? (
+                  <p>{characterData.descricaoDetalhada}</p>
+                ) : (
+                  <p className="text-gray-500 italic">Esta seção exibe a descrição detalhada do personagem. Use o botão de edição (lápis) para adicionar uma descrição completa e detalhada.</p>
+                )}
               </div>
             </div>
 
@@ -520,6 +1705,40 @@ export default function CharacterPage() {
           </div>
         </div>
       </main>
+
+      {/* Modal para editar informações da sidebar */}
+      <SidebarEditModal
+        isOpen={showSidebarEditModal}
+        onClose={() => setShowSidebarEditModal(false)}
+        character={character}
+        onSave={handleSidebarEditSave}
+      />
+
+      {/* Modal para editar conteúdo principal */}
+      <MainContentEditModal
+        isOpen={showMainContentEditModal}
+        onClose={() => setShowMainContentEditModal(false)}
+        character={character}
+        characterData={characterData}
+        onSave={handleMainContentEditSave}
+      />
+
+      {/* Modal para editar informações da sidebar */}
+      <SidebarInfoEditModal
+        isOpen={showSidebarInfoEditModal}
+        onClose={() => setShowSidebarInfoEditModal(false)}
+        character={character}
+        onSave={handleSidebarInfoEditSave}
+      />
+
+      {/* Modal para editar sidebar com campos customizáveis */}
+      <SidebarCustomEditModal
+        isOpen={showSidebarCustomEditModal}
+        onClose={() => setShowSidebarCustomEditModal(false)}
+        character={character}
+        characterData={characterData}
+        onSave={handleSidebarCustomEditSave}
+      />
     </div>
   );
 } 

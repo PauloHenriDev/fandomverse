@@ -1,273 +1,305 @@
-# Guia de Personagens - Sistema de Fandoms
-
-Este guia explica como adicionar, editar e gerenciar personagens nas fandoms do sistema.
-
-## 📋 Índice
-
-1. [Visão Geral](#visão-geral)
-2. [Como Adicionar Personagens](#como-adicionar-personagens)
-3. [Como Editar Personagens](#como-editar-personagens)
-4. [Como Excluir Personagens](#como-excluir-personagens)
-5. [Página Dedicada de Personagens](#página-dedicada-de-personagens)
-6. [Responsividade](#responsividade)
-7. [Troubleshooting](#troubleshooting)
+# 📖 Guia Completo - Sistema de Personagens
 
 ## 🎯 Visão Geral
 
-O sistema permite que criadores de fandoms adicionem personagens personalizados com:
-- **Nome**: Título do personagem
-- **Descrição**: Informações sobre o personagem
-- **Imagem**: URL da imagem do personagem
-- **Cor do Card**: Cor personalizada para o card do personagem
+O sistema de personagens permite criar, gerenciar e exibir personagens detalhados para cada fandom. Cada personagem possui uma ficha completa com informações básicas, sidebar customizável e conteúdo detalhado.
 
-## ➕ Como Adicionar Personagens
+## 🗂️ Estrutura de Dados
 
-### Passo a Passo:
+### Tabela Principal: `section_items`
+Os personagens são armazenados na tabela `section_items` com os seguintes campos:
 
-1. **Acesse a página da sua fandom**
-   - Vá para `/fandom/[id]` onde `[id]` é o ID da sua fandom
+- **`item_type`**: Sempre `'character'`
+- **`item_title`**: Nome do personagem
+- **`item_description`**: Descrição básica
+- **`item_image_url`**: URL da imagem
+- **`item_color`**: Cor do card
+- **`custom_data`**: Dados detalhados em JSON
 
-2. **Clique em "Editar Página"**
-   - Este botão só aparece para o criador da fandom
-   - Localizado no canto superior direito da página
+### Dados Customizados (`custom_data`)
+```json
+{
+  // Informações Básicas da Sidebar
+  "fandom": "Nome da fandom",
+  "tipo": "Personagem/NPC/Vilão/Aliado",
+  "raca": "Raça do personagem",
+  "idade": "Idade do personagem",
+  "altura": "Altura do personagem",
+  "peso": "Peso do personagem",
+  
+  // Informações de RPG/Game
+  "classe": "Classe do personagem",
+  "nivel": "Nível do personagem",
+  "alinhamento": "Alinhamento moral",
+  "statusVida": "Vivo/Morto/Desaparecido/Inconsciente",
+  
+  // Conteúdo Detalhado
+  "descricaoDetalhada": "Descrição completa e detalhada do personagem",
+  "personalidade": "Descrição da personalidade",
+  "aparencia": "Características físicas",
+  "habilidades": "Poderes e capacidades",
+  "equipamentos": "Armas e itens",
+  "background": "História de fundo",
+  "relacionamentos": "Conexões com outros",
+  "curiosidades": "Fatos interessantes",
+  "quote": "Citação marcante",
+  "quoteSource": "Fonte da citação"
+}
+```
 
-3. **Navegue até a seção "Personagens"**
-   - Role para baixo até encontrar a seção de personagens
-   - Se não existir, ela será criada automaticamente
+## 🚀 Como Usar
 
-4. **Clique em "Adicionar Personagem"**
-   - Botão localizado na seção de personagens
+### 1. Adicionando Personagens
 
-5. **Preencha os campos:**
-   - **Nome**: Nome do personagem (obrigatório)
-   - **Descrição**: Descrição detalhada do personagem (obrigatório)
-   - **URL da Imagem**: Link para a imagem do personagem (opcional)
-   - **Cor do Card**: Cor personalizada (padrão: #926DF6)
+#### Via Página de Edição da Fandom
+1. Acesse a página da sua fandom
+2. Clique em "Editar Fandom"
+3. Na seção "Personagens", clique em "+ Adicionar Personagem"
+4. Preencha:
+   - **Nome do Personagem** (obrigatório)
+   - **Descrição** (obrigatório)
+   - **URL da Imagem** (opcional)
+   - **Cor do Card** (padrão: #926DF6)
+5. Clique em "Adicionar Personagem"
 
-6. **Clique em "Adicionar"**
-   - O personagem será salvo e aparecerá na lista
+#### Via Modal de Adição
+- O modal é responsivo e funciona em mobile/desktop
+- Validação automática de campos obrigatórios
+- Preview da cor selecionada
 
-### Campos do Formulário:
+### 2. Visualizando Personagens
 
-| Campo | Tipo | Obrigatório | Descrição |
-|-------|------|-------------|-----------|
-| Nome | Texto | ✅ | Nome do personagem |
-| Descrição | Texto | ✅ | Descrição detalhada |
-| URL da Imagem | URL | ❌ | Link para imagem |
-| Cor do Card | Cor | ❌ | Cor personalizada |
+#### Lista de Personagens
+- Acesse `/fandom/[id]/characters`
+- Visualização em grid responsivo
+- Cards com informações básicas
+- Botões de ação (editar/excluir) para criadores
 
-## ✏️ Como Editar Personagens
+#### Ficha Individual do Personagem
+- Acesse `/fandom/[id]/characters/[characterId]`
+- Layout com sidebar e conteúdo principal
+- Navegação por seções
+- Design responsivo
 
-### Método 1: Pela Página de Edição
+### 3. Editando Personagens
 
-1. Acesse a página de edição da fandom
-2. Na seção de personagens, clique no ícone de editar (lápis)
-3. Modifique os campos desejados
-4. Clique em "Salvar"
+#### Edição Rápida (Informações Básicas) - ⚙️ Engrenagem
+**Localização**: Botão com ícone de engrenagem na sidebar
+1. Clique no ícone de **engrenagem** (⚙️) na sidebar
+2. Modal abre para editar:
+   - Nome do personagem
+   - **Descrição Curta** (para sidebar e cards)
+   - URL da imagem
+   - Cor do card
+3. Clique em "Salvar Alterações"
 
-### Método 2: Pela Página de Personagens
+#### Edição da Sidebar Completa - ✏️ Lápis na Sidebar
+**Localização**: Botão com ícone de lápis na sidebar
+1. Clique no ícone de **lápis** (✏️) na sidebar
+2. Modal organizado em seções:
 
-1. Acesse `/fandom/[id]/characters`
-2. Passe o mouse sobre um personagem
-3. Clique no ícone de editar (lápis)
-4. Modifique os campos
-5. Clique em "Salvar"
+   **Seção: Informações Básicas**
+   - Nome do personagem
+   - Fandom
+   - Tipo (Personagem, NPC, Vilão, Aliado)
+   - Status (Ativo/Inativo)
 
-## 🗑️ Como Excluir Personagens
+   **Seção: Características**
+   - Raça
+   - Idade
+   - Altura
+   - Peso
 
-### Método 1: Pela Página de Edição
+   **Seção: RPG/Game**
+   - Classe
+   - Nível
+   - Alinhamento (9 opções de alinhamento D&D)
+   - Status de Vida (Vivo, Morto, Desaparecido, Inconsciente)
 
-1. Acesse a página de edição da fandom
-2. Na seção de personagens, clique no ícone de excluir (lixeira)
-3. Confirme a exclusão
+   **Seção: Aparência**
+   - Cor do card
+   - Ordem de exibição
 
-### Método 2: Pela Página de Personagens
+3. Clique em "Salvar Sidebar"
 
-1. Acesse `/fandom/[id]/characters`
-2. Passe o mouse sobre um personagem
-3. Clique no ícone de excluir (lixeira)
+#### Edição do Conteúdo Principal - ✏️ Lápis no Conteúdo
+**Localização**: Botão com ícone de lápis no conteúdo principal
+1. Clique no ícone de **lápis** (✏️) no conteúdo principal
+2. Modal abre para editar todo o conteúdo da ficha:
+   - **Descrição Detalhada** (para a seção principal)
+   - Personalidade
+   - Aparência
+   - Habilidades
+   - Equipamentos
+   - Background
+   - Relacionamentos
+   - Curiosidades
+   - Citação
+3. Clique em "Salvar Conteúdo da Ficha"
+
+#### Edição Completa (Página Dedicada)
+1. Acesse `/fandom/[id]/characters/[characterId]/edit`
+2. Edite todas as seções em uma página dedicada
+3. Mais espaço e funcionalidades avançadas
+
+### 4. Três Tipos de Edição Separados
+
+O sistema agora suporta **três fluxos de edição diferentes**:
+
+#### 1. Informações Básicas (⚙️ Engrenagem)
+- **Localização**: Botão de engrenagem na sidebar
+- **Campos**: Nome, descrição curta, imagem, cor
+- **Uso**: Ajustes rápidos e básicos
+- **Campo no BD**: `item_title`, `item_description`, `item_image_url`, `item_color`
+
+#### 2. Sidebar Completa (✏️ Lápis na Sidebar)
+- **Localização**: Botão de lápis na sidebar
+- **Campos**: Todos os campos da sidebar + configurações
+- **Uso**: Configuração completa da sidebar com campos customizáveis
+- **Campos no BD**: `custom_data` + campos básicos
+
+#### 3. Conteúdo Principal (✏️ Lápis no Conteúdo)
+- **Localização**: Botão de lápis no conteúdo principal
+- **Campos**: Descrição detalhada e todas as seções da ficha
+- **Uso**: Conteúdo narrativo e detalhado do personagem
+- **Campo no BD**: `custom_data` (seções detalhadas)
+
+### 5. Fluxo de Edição Recomendado
+
+1. **Primeiro**: Use a engrenagem (⚙️) para informações básicas
+   - Nome, descrição curta, imagem, cor
+2. **Segundo**: Use o lápis (✏️) na sidebar para configurar campos customizáveis
+   - Raça, idade, classe, alinhamento, etc.
+3. **Terceiro**: Use o lápis (✏️) no conteúdo para adicionar descrições detalhadas
+   - Background, personalidade, relacionamentos, etc.
+4. **Opcional**: Use a página dedicada para edições complexas
+
+### 6. Excluindo Personagens
+
+#### Via Página de Edição da Fandom
+1. Acesse "Editar Fandom"
+2. Na seção "Personagens"
+3. Clique no ícone de lixeira (🗑️)
 4. Confirme a exclusão
 
-## 📄 Página Dedicada de Personagens
+#### Via Card do Personagem
+1. Na lista de personagens
+2. Clique no ícone de lixeira no card
+3. Confirme a exclusão
 
-### Acessando a Página
+## 🎨 Design e Responsividade
 
-- **URL**: `/fandom/[id]/characters`
-- **Navegação**: Clique em "Ver mais Personagens" no carrossel da seção de personagens
-- **Acesso Direto**: Digite a URL manualmente
+### Layout Responsivo
+- **Mobile**: Layout em coluna única
+- **Tablet**: Grid 2 colunas
+- **Desktop**: Grid 3-4 colunas
 
-### Funcionalidades da Página
+### Componentes
+- **CharacterCard**: Card responsivo para listagem
+- **AddCharacterModal**: Modal responsivo para adição
+- **SidebarEditModal**: Modal para edição básica
+- **SidebarCustomEditModal**: Modal para edição completa da sidebar
+- **MainContentEditModal**: Modal para edição do conteúdo principal
+- **Página de Personagem**: Layout sidebar + conteúdo
 
-1. **Visualização Completa**: Todos os personagens da fandom
-2. **Estatísticas**: Contador total de personagens
-3. **Layout Responsivo**: Adaptado para mobile, tablet e desktop
-4. **Navegação**: Link para voltar à página principal da fandom
-5. **Edição**: Botão para editar personagens (apenas para criadores)
+### Cores e Estilos
+- Cores personalizáveis por personagem
+- Design consistente com o tema da fandom
+- Animações suaves e transições
 
-### Características da Página
+## 🔧 Funcionalidades Técnicas
 
-- **Background Personalizado**: Usa a cor de fundo da fandom
-- **Grid Responsivo**: 1 coluna (mobile) → 2 colunas (tablet) → 3-4 colunas (desktop)
-- **Cards Otimizados**: Sem botão "Ver mais" para evitar redundância
-- **Estados Vazios**: Mensagem amigável quando não há personagens
+### Segurança
+- **Row Level Security (RLS)** habilitado
+- Apenas criadores podem editar/excluir
+- Validação de permissões em todas as operações
 
-## 👤 Página Individual do Personagem
+### Performance
+- Índices otimizados no banco de dados
+- Carregamento lazy de imagens
+- Cache de dados quando apropriado
 
-### Acessando a Página
+### Validação
+- Campos obrigatórios validados
+- URLs de imagem validadas
+- Cores em formato hexadecimal
 
-- **URL**: `/fandom/[id]/characters/[characterId]`
-- **Navegação**: Clique em "Ver mais" em qualquer card de personagem individual
-- **Acesso Direto**: Digite a URL manualmente
+## 📱 Experiência do Usuário
 
-### Funcionalidades da Página
+### Para Criadores
+- Interface intuitiva para gerenciamento
+- Feedback visual imediato
+- Confirmações para ações destrutivas
+- Modais responsivos
+- Três fluxos de edição específicos para diferentes necessidades
 
-1. **Visualização Detalhada**: Informações completas do personagem
-2. **Imagem em Destaque**: Imagem grande do personagem
-3. **Descrição Completa**: Texto completo sem truncamento
-4. **Informações Adicionais**: Fandom, cor do personagem
-5. **Navegação Intuitiva**: Links para voltar aos personagens ou à fandom
+### Para Visitantes
+- Visualização limpa e organizada
+- Navegação fácil entre seções
+- Design atrativo e moderno
+- Informações bem estruturadas
+- Sidebar rica em informações customizáveis
 
-### Características da Página
+## 🎯 Dicas de Uso
 
-- **Layout Focado**: Design centrado no personagem
-- **Imagem Prominente**: Imagem grande e destacada
-- **Descrição Completa**: Texto sem limitações de caracteres
-- **Navegação Clara**: Breadcrumbs e botões de ação
-- **Responsivo**: Adaptado para todos os dispositivos
+### Criando Personagens Eficazmente
+1. **Nome**: Escolha nomes memoráveis e únicos
+2. **Descrição**: Seja conciso mas informativo
+3. **Imagem**: Use URLs de imagens estáveis
+4. **Cor**: Escolha cores que combinem com o personagem
 
-## 🔗 Diferença Entre os Botões "Ver mais"
+### Organizando Informações na Sidebar
+1. **Informações Básicas**: Nome, fandom, tipo, status
+2. **Características**: Raça, idade, altura, peso
+3. **RPG/Game**: Classe, nível, alinhamento, status de vida
+4. **Aparência**: Cor do card, ordem de exibição
 
-### Botão do Carrossel (Seção de Personagens)
-- **Localização**: Abaixo do carrossel de personagens
-- **Texto**: "Ver mais Personagens"
-- **Ação**: Redireciona para `/fandom/[id]/characters`
-- **Propósito**: Ver todos os personagens da fandom
+### Organizando Informações no Conteúdo
+1. **Personalidade**: Foque em traços de caráter
+2. **Aparência**: Detalhes físicos distintivos
+3. **Habilidades**: Capacidades especiais e poderes
+4. **Background**: História que explique o personagem
+5. **Relacionamentos**: Conexões importantes
+6. **Curiosidades**: Fatos interessantes e únicos
 
-### Botão do Card Individual
-- **Localização**: No card de cada personagem
-- **Texto**: "Ver mais"
-- **Ação**: Redireciona para `/fandom/[id]/characters/[characterId]`
-- **Propósito**: Ver detalhes específicos do personagem
+### Exemplos de Uso
 
-## 📱 Responsividade
+#### Personagem de RPG
+- **Sidebar**: Raça (Humano), Classe (Guerreiro), Nível (15), Alinhamento (Leal e Bom)
+- **Conteúdo**: Background detalhado, habilidades específicas, equipamentos
 
-### Mobile (até 640px)
-- **Grid**: 1 coluna
-- **Cards**: Largura máxima de 300px
-- **Texto**: Tamanhos reduzidos (text-xs, text-sm)
-- **Espaçamento**: Padding reduzido
-- **Botões**: Tamanho otimizado para toque
+#### Personagem de Anime/Manga
+- **Sidebar**: Tipo (Personagem), Raça (Humano), Idade (16 anos)
+- **Conteúdo**: Personalidade, relacionamentos, curiosidades sobre o personagem
 
-### Tablet (640px - 1024px)
-- **Grid**: 2-3 colunas
-- **Cards**: Largura adaptativa
-- **Texto**: Tamanhos médios
-- **Espaçamento**: Padding moderado
+#### NPC
+- **Sidebar**: Tipo (NPC), Status de Vida (Vivo), Classe (Mercador)
+- **Conteúdo**: Background simples, relacionamentos com outros personagens
 
-### Desktop (1024px+)
-- **Grid**: 3-4 colunas
-- **Cards**: Largura máxima
-- **Texto**: Tamanhos completos
-- **Espaçamento**: Padding completo
+## 🔄 Fluxo de Trabalho Recomendado
 
-### Breakpoints Utilizados
+1. **Criar Fandom** → Configurar página básica
+2. **Adicionar Personagens** → Informações básicas primeiro
+3. **Detalhar Personagens** → Completar fichas individuais
+4. **Organizar** → Ajustar ordem e cores
+5. **Revisar** → Verificar informações e links
+6. **Manter** → Atualizações conforme necessário
 
-```css
-/* Mobile */
-@media (max-width: 639px) { ... }
-
-/* Tablet */
-@media (min-width: 640px) and (max-width: 1023px) { ... }
-
-/* Desktop */
-@media (min-width: 1024px) { ... }
-```
-
-## 🔧 Troubleshooting
+## 🆘 Solução de Problemas
 
 ### Problemas Comuns
+- **Imagem não carrega**: Verifique se a URL está correta e acessível
+- **Erro ao salvar**: Verifique se todos os campos obrigatórios estão preenchidos
+- **Permissão negada**: Certifique-se de ser o criador da fandom
 
-#### 1. Personagem não aparece após adicionar
-**Solução**: 
-- Recarregue a página
-- Verifique se o personagem está marcado como ativo
-- Confirme se a seção "Personagens" existe
-
-#### 2. Erro ao salvar personagem
-**Possíveis causas**:
-- Campos obrigatórios vazios
-- URL da imagem inválida
-- Problema de conexão com o banco
-
-**Solução**:
-- Preencha todos os campos obrigatórios
-- Verifique se a URL da imagem é válida
-- Tente novamente
-
-#### 3. Botões de edição não aparecem
-**Causa**: Você não é o criador da fandom
-**Solução**: Entre em contato com o criador da fandom
-
-#### 4. Imagem não carrega
-**Possíveis causas**:
-- URL inválida
-- Imagem não acessível
-- Problema de CORS
-
-**Solução**:
-- Use URLs de imagens públicas
-- Verifique se a URL está correta
-- Teste a URL em uma nova aba
-
-#### 5. Página de personagens não carrega
-**Possíveis causas**:
-- Fandom não existe
-- Página personalizada não criada
-- Erro de permissão
-
-**Solução**:
-- Verifique se a URL está correta
-- Confirme se a fandom existe
-- Entre em contato com o suporte
-
-### Logs de Erro
-
-Para debug, verifique o console do navegador:
-```javascript
-// Erros comuns no console
-console.error('Erro ao carregar personagens:', error);
-console.error('Erro ao salvar personagem:', error);
-```
-
-## 🎨 Personalização
-
-### Cores Recomendadas
-
-```css
-/* Cores padrão do sistema */
---primary-color: #926DF6;
---primary-hover: #A98AF8;
---success-color: #10B981;
---warning-color: #F59E0B;
---error-color: #EF4444;
-```
-
-### URLs de Imagem Recomendadas
-
-- **Imagens Públicas**: Use serviços como Unsplash, Pexels
-- **Formatos**: JPG, PNG, WebP
-- **Tamanho**: Mínimo 300x300px
-- **Peso**: Máximo 2MB
-
-## 📞 Suporte
-
-Se encontrar problemas:
-1. Verifique este guia
-2. Teste em diferentes navegadores
-3. Limpe o cache do navegador
-4. Entre em contato com o suporte técnico
+### Contato
+Para problemas técnicos, verifique:
+1. Console do navegador para erros
+2. Logs do Supabase
+3. Permissões de usuário
+4. Conectividade de rede
 
 ---
 
-**Última atualização**: Dezembro 2024
-**Versão**: 2.0 
+**✨ Sistema de Personagens - Versão 2.0**  
+*Funcionalidades completas para criação e gerenciamento de personagens em fandoms* 
