@@ -7,6 +7,7 @@ import Link from "next/link";
 import FandomHeader from "@/components/ui/FandomHeader";
 import { HeroSection, CardGrid } from "@/components/templates";
 import CharacterCard from "@/components/ui/CharacterCard";
+import FilterStats from "@/components/ui/FilterStats";
 
 // Interfaces para os dados da página
 interface FandomPage {
@@ -88,14 +89,66 @@ export default function FandomPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Estados para categorias e filtros
-  const [categories, setCategories] = useState<Category[]>([
-    { id: 'all', name: 'Todos', isActive: true },
-    { id: 'protagonists', name: 'Protagonistas', isActive: false },
-    { id: 'antagonists', name: 'Antagonistas', isActive: false },
-    { id: 'supporting', name: 'Coadjuvantes', isActive: false }
-  ]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filteredCharacters, setFilteredCharacters] = useState<SectionItem[]>([]);
+
+  // Função para carregar filtros do banco de dados
+  const loadFilters = useCallback(async () => {
+    try {
+      if (!fandomPage) return;
+
+      // Carregar seção de personagens
+      const { data: sectionsData, error: sectionsError } = await supabase
+        .from('fandom_sections')
+        .select('*')
+        .eq('fandom_page_id', fandomPage.id)
+        .eq('section_title', 'Personagens')
+        .single();
+
+      if (sectionsError) {
+        console.error('Erro ao carregar seção de personagens:', sectionsError);
+        return;
+      }
+
+      // Carregar filtros
+      const { data: filtersData, error: filtersError } = await supabase
+        .from('section_filters')
+        .select('*')
+        .eq('section_id', sectionsData.id)
+        .eq('is_active', true)
+        .order('filter_order');
+
+      if (filtersError) {
+        console.error('Erro ao carregar filtros:', filtersError);
+        return;
+      }
+
+      // Converter filtros do banco para o formato da interface
+      const dbCategories: Category[] = [
+        { id: 'all', name: 'Todos', isActive: true }
+      ];
+
+      filtersData?.forEach(filter => {
+        dbCategories.push({
+          id: filter.filter_value,
+          name: filter.filter_label,
+          isActive: false
+        });
+      });
+
+      setCategories(dbCategories);
+    } catch (error) {
+      console.error('Erro ao carregar filtros:', error);
+    }
+  }, [fandomPage]);
+
+  // Carregar filtros quando a página carregar
+  useEffect(() => {
+    if (fandomPage) {
+      loadFilters();
+    }
+  }, [fandomPage, loadFilters]);
 
   // Função para filtrar personagens por categoria
   const filterCharactersByCategory = useCallback((categoryId: string) => {
@@ -387,9 +440,25 @@ export default function FandomPage() {
           <div className="pl-[150px] pr-[150px]">
             {/* Seção de Personagem */}
             <div className="">
-              <p className="text-[50px] text-white font-bold mb-6">Personagens</p>
+              <div className="flex justify-between items-center mb-6">
+                <p className="text-[50px] text-white font-bold">Personagens</p>
+                <Link
+                  href={`/fandom/${fandomId}/manage-filters`}
+                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                >
+                  Gerenciar Filtros
+                </Link>
+              </div>
               {/* Cards usando CardGrid e Carrossel */}
               <div>
+                {/* Estatísticas dos Filtros */}
+                {categories.length > 1 && (
+                  <FilterStats 
+                    categories={categories}
+                    characters={filteredCharacters.length > 0 ? filteredCharacters : []}
+                  />
+                )}
+                
                 {/* Carrossel de Categorias */}
                 <div className="bg-blue-500 p-[5px] rounded-[10px] w-fit max-w-full mt-[15px] overflow-hidden mb-[15px]">
                   <div className="flex text-[15px] overflow-x-auto gap-[10px]">
