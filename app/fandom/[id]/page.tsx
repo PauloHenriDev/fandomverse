@@ -88,7 +88,9 @@ export default function FandomPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Estados para categorias e filtros
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>([
+    { id: 'all', name: 'Todos', isActive: true }
+  ]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filteredCharacters, setFilteredCharacters] = useState<SectionItem[]>([]);
 
@@ -128,6 +130,7 @@ export default function FandomPage() {
         { id: 'all', name: 'Todos', isActive: true }
       ];
 
+      // Adiciona filtros do banco de dados
       filtersData?.forEach(filter => {
         dbCategories.push({
           id: filter.filter_value,
@@ -136,7 +139,19 @@ export default function FandomPage() {
         });
       });
 
-      setCategories(dbCategories);
+      // Atualiza as categorias apenas se forem diferentes das atuais
+      setCategories(prevCategories => {
+        // Se as categorias já estão carregadas e são as mesmas, não atualiza
+        if (prevCategories.length === dbCategories.length) {
+          const hasSameCategories = prevCategories.every((cat, index) => 
+            cat.id === dbCategories[index].id && cat.name === dbCategories[index].name
+          );
+          if (hasSameCategories) {
+            return prevCategories;
+          }
+        }
+        return dbCategories;
+      });
     } catch (error) {
       console.error('Erro ao carregar filtros:', error);
     }
@@ -147,7 +162,7 @@ export default function FandomPage() {
     if (fandomPage) {
       loadFilters();
     }
-  }, [fandomPage, loadFilters]);
+  }, [fandomPage]);
 
   // Função para filtrar personagens por categoria
   const filterCharactersByCategory = useCallback((categoryId: string) => {
