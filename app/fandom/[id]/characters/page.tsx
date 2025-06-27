@@ -202,9 +202,16 @@ export default function CharactersPage() {
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
                 Todos os Personagens
               </h2>
-              <p className="text-white opacity-90 text-sm sm:text-base">
+              <p className="text-white opacity-90 text-sm sm:text-base mb-4">
                 Clique em um personagem para ver mais detalhes
               </p>
+              {/* Botão de Gerenciar Filtros */}
+              <Link
+                href={`/fandom/${fandomId}/manage-filters`}
+                className="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+              >
+                Gerenciar Filtros
+              </Link>
             </div>
 
             <CardGrid className="gap-[16px] md:gap-[24px] lg:gap-[30px]">

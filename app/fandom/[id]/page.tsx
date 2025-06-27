@@ -7,7 +7,6 @@ import Link from "next/link";
 import FandomHeader from "@/components/ui/FandomHeader";
 import { HeroSection, CardGrid } from "@/components/templates";
 import CharacterCard from "@/components/ui/CharacterCard";
-import FilterStats from "@/components/ui/FilterStats";
 
 // Interfaces para os dados da página
 interface FandomPage {
@@ -451,14 +450,6 @@ export default function FandomPage() {
               </div>
               {/* Cards usando CardGrid e Carrossel */}
               <div>
-                {/* Estatísticas dos Filtros */}
-                {categories.length > 1 && (
-                  <FilterStats 
-                    categories={categories}
-                    characters={filteredCharacters.length > 0 ? filteredCharacters : []}
-                  />
-                )}
-                
                 {/* Carrossel de Categorias */}
                 <div className="bg-blue-500 p-[5px] rounded-[10px] w-fit max-w-full mt-[15px] overflow-hidden mb-[15px]">
                   <div className="flex text-[15px] overflow-x-auto gap-[10px]">
