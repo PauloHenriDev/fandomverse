@@ -193,7 +193,7 @@ export default function CharactersPage() {
       />
 
       {/* Conteúdo da página */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-[16px] sm:px-[24px] lg:px-[32px] py-[24px] sm:py-[32px]">
 
         {/* Lista de personagens */}
         {characters.length > 0 ? (
@@ -207,7 +207,7 @@ export default function CharactersPage() {
               </p>
             </div>
 
-            <CardGrid className="gap-4 md:gap-6 lg:gap-8">
+            <CardGrid className="gap-[16px] md:gap-[24px] lg:gap-[5px]">
               {characters.map((character) => (
                 <CharacterCard
                   key={character.id}
