@@ -69,7 +69,12 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
         
         {/* Informações da fandom */}
         <div className="flex flex-col">
-          <h1 className="text-[24px] font-bold truncate max-w-[300px]">{fandomName}</h1>
+          <Link 
+            href={`/fandom/${fandomId}`}
+            className="text-[24px] font-bold truncate max-w-[300px] cursor-pointer"
+          >
+            {fandomName}
+          </Link>
           <p className="text-[14px] text-[#E3DBFC] truncate max-w-[300px]">{fandomDescription}</p>
         </div>
       </div>
