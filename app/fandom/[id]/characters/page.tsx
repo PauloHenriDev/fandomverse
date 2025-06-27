@@ -7,6 +7,7 @@ import Link from "next/link";
 import CharacterCard from "@/components/ui/CharacterCard";
 import { User } from "@supabase/supabase-js";
 import FandomHeader from "@/components/ui/FandomHeader";
+import { CardGrid } from "@/components/templates";
 
 // Interfaces para os dados
 interface Fandom {
@@ -247,20 +248,19 @@ export default function CharactersPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <CardGrid className="gap-4 md:gap-6 lg:gap-8">
               {characters.map((character) => (
-                <div key={character.id} className="flex justify-center">
-                  <CharacterCard
-                    id={character.id}
-                    title={character.item_title}
-                    description={character.item_description}
-                    image_url={character.item_image_url}
-                    color={character.item_color}
-                    fandomId={fandomId}
-                  />
-                </div>
+                <CharacterCard
+                  key={character.id}
+                  id={character.id}
+                  title={character.item_title}
+                  description={character.item_description}
+                  image_url={character.item_image_url}
+                  color={character.item_color}
+                  fandomId={fandomId}
+                />
               ))}
-            </div>
+            </CardGrid>
           </div>
         ) : (
           <div className="text-center py-12 sm:py-16">

@@ -23,7 +23,7 @@ export default function CardGrid({
 }: CardGridProps) {
   return (
     // Container flexível que quebra automaticamente para nova linha
-    <div className={`flex mt-[10px] ${gap} flex-wrap ${className}`}>
+    <div className={`flex ${gap} flex-wrap justify-start ${className}`}>
       {children}
     </div>
   );

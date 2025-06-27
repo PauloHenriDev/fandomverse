@@ -35,7 +35,7 @@ export default function CharacterCard({
   };
 
   const cardContent = (
-    <div className="w-[300px] h-[500px] relative group flex flex-col">
+    <div className="w-[300px] h-[500px] relative group flex flex-col flex-shrink-0">
       {/* Imagem do Personagem */}
       <div 
         className="flex w-full h-[250px] rounded-t-[10px] justify-center items-center overflow-hidden flex-shrink-0"
