@@ -490,10 +490,16 @@ function MainContentEditModal({
     setMessage('');
 
     try {
+      // Preserva os dados da sidebar existentes e adiciona/atualiza apenas os dados do conteúdo principal
+      const updatedCustomData = {
+        ...characterData, // Mantém todos os dados existentes (incluindo dados da sidebar)
+        ...formData // Adiciona/atualiza apenas os dados do conteúdo principal
+      };
+
       const { error } = await supabase
         .from('section_items')
         .update({
-          custom_data: formData
+          custom_data: updatedCustomData
         })
         .eq('id', character.id);
 
@@ -504,7 +510,7 @@ function MainContentEditModal({
       setMessage('Conteúdo da ficha atualizado com sucesso!');
       
       // Chama a função de callback para atualizar os dados
-      onSave(formData);
+      onSave(updatedCustomData);
 
       setTimeout(() => {
         onClose();
@@ -800,6 +806,12 @@ function SidebarCustomEditModal({
         statusVida: formData.statusVida
       };
 
+      // Preserva os dados do conteúdo principal existentes e adiciona/atualiza apenas os dados da sidebar
+      const updatedCustomData = {
+        ...characterData, // Mantém todos os dados existentes (incluindo dados do conteúdo principal)
+        ...sidebarData // Adiciona/atualiza apenas os dados da sidebar
+      };
+
       const { error } = await supabase
         .from('section_items')
         .update({
@@ -807,10 +819,7 @@ function SidebarCustomEditModal({
           item_color: formData.corCard,
           item_order: formData.ordem,
           is_active: formData.status === 'Ativo',
-          custom_data: {
-            ...characterData,
-            ...sidebarData
-          }
+          custom_data: updatedCustomData
         })
         .eq('id', character.id);
 
@@ -821,10 +830,7 @@ function SidebarCustomEditModal({
       setMessage('Sidebar atualizada com sucesso!');
       
       // Chama a função de callback para atualizar os dados
-      onSave({
-        ...characterData,
-        ...sidebarData
-      });
+      onSave(updatedCustomData);
 
       setTimeout(() => {
         onClose();
