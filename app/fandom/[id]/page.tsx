@@ -237,7 +237,6 @@ export default function FandomPage() {
                         description={item.item_description}
                         image_url={item.item_image_url}
                         color={item.item_color}
-                        isEditable={user?.id === fandom?.creator_id}
                         fandomId={fandomId}
                       />
                     </div>
