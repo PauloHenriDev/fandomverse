@@ -204,27 +204,6 @@ export default function CharactersPage() {
           </p>
         </div>
 
-        {/* Estatísticas */}
-        <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
-                Estatísticas dos Personagens
-              </h2>
-              <p className="text-sm sm:text-base text-gray-600">
-                Total de {characters.length} personagem{characters.length !== 1 ? 's' : ''} nesta fandom
-              </p>
-            </div>
-            
-            <div className="flex gap-4 text-center">
-              <div className="bg-[#926DF6] text-white px-4 py-2 rounded-lg">
-                <div className="text-lg sm:text-xl font-bold">{characters.length}</div>
-                <div className="text-xs sm:text-sm">Personagens</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Lista de personagens */}
         {characters.length > 0 ? (
           <div className="space-y-6 sm:space-y-8">
