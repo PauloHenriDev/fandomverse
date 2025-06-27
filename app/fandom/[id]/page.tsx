@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { HeroSection, FilterSection, PageSection } from "@/components/templates";
 import CharacterCard from "@/components/ui/CharacterCard";
-import { User } from "@supabase/supabase-js";
+import FandomHeader from "@/components/ui/FandomHeader";
 import Image from "next/image";
 
 // Interfaces para os dados da página
@@ -81,7 +81,6 @@ export default function FandomPage() {
   const fandomId = params.id as string;
 
   // Estados para gerenciar dados da página
-  const [user, setUser] = useState<User | null>(null);
   const [fandom, setFandom] = useState<Fandom | null>(null);
   const [fandomPage, setFandomPage] = useState<FandomPage | null>(null);
   const [sections, setSections] = useState<FandomSection[]>([]);
@@ -93,10 +92,6 @@ export default function FandomPage() {
   // Hook que executa quando o componente é montado
   const loadPageData = useCallback(async () => {
     try {
-      // Verifica se o usuário está logado (opcional)
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-
       // Carrega dados da fandom
       const { data: fandomData, error: fandomError } = await supabase
         .from('fandoms')
@@ -334,26 +329,13 @@ export default function FandomPage() {
       className="min-h-screen"
       style={{ backgroundColor: fandomPage.background_color }}
     >
-      {/* Header com botão de edição para o criador */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 gap-4">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">{fandom.name}</h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-1 line-clamp-2">{fandom.description}</p>
-            </div>
-            
-            {user?.id === fandom.creator_id && (
-              <Link
-                href={`/fandom/${fandomId}/edit`}
-                className="bg-[#926DF6] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-[#A98AF8] transition-colors text-sm sm:text-base whitespace-nowrap flex-shrink-0"
-              >
-                Editar Página
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* Header com estilo do Header.tsx global */}
+      <FandomHeader
+        fandomName={fandom.name}
+        fandomDescription={fandom.description}
+        fandomId={fandomId}
+        creatorId={fandom.creator_id}
+      />
 
       {/* Conteúdo da página */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">

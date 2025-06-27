@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../../../../../lib/supabase";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import FandomHeader from "@/components/ui/FandomHeader";
 
 // Interfaces para os dados
 interface Fandom {
@@ -261,27 +262,26 @@ export default function EditCharacterPage() {
       className="min-h-screen"
       style={{ backgroundColor: fandomPage.background_color }}
     >
-      {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-2">
-                <Link 
-                  href={`/fandom/${fandomId}/characters/${characterId}`}
-                  className="text-[#926DF6] hover:text-[#A98AF8] transition-colors text-sm sm:text-base"
-                >
-                  ← Voltar para o Personagem
-                </Link>
-              </div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">
-                Editar {character.item_title}
-              </h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-1">
-                Edite as informações da ficha do personagem
-              </p>
-            </div>
-          </div>
+      {/* Header com estilo do Header.tsx global */}
+      <FandomHeader
+        fandomName={fandom.name}
+        fandomDescription={fandom.description}
+        fandomId={fandomId}
+        creatorId={fandom.creator_id}
+      />
+
+      {/* Navegação */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center gap-3 mb-4">
+          <Link 
+            href={`/fandom/${fandomId}/characters/${characterId}`}
+            className="text-[#926DF6] hover:text-[#A98AF8] transition-colors text-sm sm:text-base flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Voltar para o Personagem
+          </Link>
         </div>
       </div>
 
@@ -289,6 +289,16 @@ export default function EditCharacterPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="bg-white rounded-lg shadow-sm p-6 sm:p-8">
           
+          {/* Título da página */}
+          <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+              Editar {character.item_title}
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600">
+              Edite as informações da ficha do personagem
+            </p>
+          </div>
+
           {/* Informações Básicas */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Informações Básicas</h2>
