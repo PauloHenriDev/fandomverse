@@ -724,13 +724,18 @@ function SidebarCustomEditModal({
 }) {
   const [formData, setFormData] = useState({
     nome: '',
-    fandom: '',
-    tipo: 'Personagem',
     status: 'Ativo',
-    raca: '',
+    alias: '',
+    dataNascimento: '',
+    genero: '',
+    afiliacao: '',
+    especie: '',
     idade: '',
     altura: '',
     peso: '',
+    corOlhos: '',
+    tomPele: '',
+    corCabelos: '',
     classe: '',
     nivel: '',
     alinhamento: '',
@@ -746,13 +751,18 @@ function SidebarCustomEditModal({
     if (character && isOpen) {
       setFormData({
         nome: character.item_title,
-        fandom: characterData.fandom || '',
-        tipo: characterData.tipo || 'Personagem',
         status: character.is_active ? 'Ativo' : 'Inativo',
-        raca: characterData.raca || '',
+        alias: characterData.alias || '',
+        dataNascimento: characterData.dataNascimento || '',
+        genero: characterData.genero || '',
+        afiliacao: characterData.afiliacao || '',
+        especie: characterData.especie || '',
         idade: characterData.idade || '',
         altura: characterData.altura || '',
         peso: characterData.peso || '',
+        corOlhos: characterData.corOlhos || '',
+        tomPele: characterData.tomPele || '',
+        corCabelos: characterData.corCabelos || '',
         classe: characterData.classe || '',
         nivel: characterData.nivel || '',
         alinhamento: characterData.alinhamento || '',
@@ -773,12 +783,17 @@ function SidebarCustomEditModal({
     try {
       // Prepara os dados customizados da sidebar
       const sidebarData = {
-        fandom: formData.fandom,
-        tipo: formData.tipo,
-        raca: formData.raca,
+        alias: formData.alias,
+        dataNascimento: formData.dataNascimento,
+        genero: formData.genero,
+        afiliacao: formData.afiliacao,
+        especie: formData.especie,
         idade: formData.idade,
         altura: formData.altura,
         peso: formData.peso,
+        corOlhos: formData.corOlhos,
+        tomPele: formData.tomPele,
+        corCabelos: formData.corCabelos,
         classe: formData.classe,
         nivel: formData.nivel,
         alinhamento: formData.alinhamento,
@@ -875,30 +890,57 @@ function SidebarCustomEditModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fandom
+                  Alias
                 </label>
                 <input
                   type="text"
-                  value={formData.fandom}
-                  onChange={(e) => handleInputChange('fandom', e.target.value)}
+                  value={formData.alias}
+                  onChange={(e) => handleInputChange('alias', e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
-                  placeholder="Nome da fandom"
+                  placeholder="Ex: Batman, Dark Knight"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo
+                  Idade
+                </label>
+                <input
+                  type="text"
+                  value={formData.idade}
+                  onChange={(e) => handleInputChange('idade', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: 25 anos, 150 anos"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Data de Nascimento
+                </label>
+                <input
+                  type="text"
+                  value={formData.dataNascimento}
+                  onChange={(e) => handleInputChange('dataNascimento', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: 15/03/1985, 23 de março de 1990"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gênero
                 </label>
                 <select
-                  value={formData.tipo}
-                  onChange={(e) => handleInputChange('tipo', e.target.value)}
+                  value={formData.genero}
+                  onChange={(e) => handleInputChange('genero', e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
                 >
-                  <option value="Personagem">Personagem</option>
-                  <option value="NPC">NPC</option>
-                  <option value="Vilão">Vilão</option>
-                  <option value="Aliado">Aliado</option>
+                  <option value="">Selecione...</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Não-binário">Não-binário</option>
+                  <option value="Outro">Outro</option>
                 </select>
               </div>
 
@@ -915,36 +957,75 @@ function SidebarCustomEditModal({
                   <option value="Inativo">Inativo</option>
                 </select>
               </div>
-            </div>
-          </div>
 
-          {/* Seção: Características */}
-          <div className="border-b border-gray-200 pb-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Características</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Raça
+                  Afiliação
                 </label>
                 <input
                   type="text"
-                  value={formData.raca}
-                  onChange={(e) => handleInputChange('raca', e.target.value)}
+                  value={formData.afiliacao}
+                  onChange={(e) => handleInputChange('afiliacao', e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
-                  placeholder="Ex: Humano, Elfo, Orc"
+                  placeholder="Ex: Liga da Justiça, Vingadores"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Idade
+                  Espécie
                 </label>
                 <input
                   type="text"
-                  value={formData.idade}
-                  onChange={(e) => handleInputChange('idade', e.target.value)}
+                  value={formData.especie}
+                  onChange={(e) => handleInputChange('especie', e.target.value)}
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
-                  placeholder="Ex: 25 anos, 150 anos"
+                  placeholder="Ex: Humano, Elfo, Orc, Saiyajin"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Seção: Aparência */}
+          <div className="border-b border-gray-200 pb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Aparência</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tom de Pele
+                </label>
+                <input
+                  type="text"
+                  value={formData.tomPele}
+                  onChange={(e) => handleInputChange('tomPele', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: Clara, Média, Escura"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cor dos Olhos
+                </label>
+                <input
+                  type="text"
+                  value={formData.corOlhos}
+                  onChange={(e) => handleInputChange('corOlhos', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: Azul, Verde, Castanho"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Cor dos Cabelos
+                </label>
+                <input
+                  type="text"
+                  value={formData.corCabelos}
+                  onChange={(e) => handleInputChange('corCabelos', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: Loiro, Castanho, Preto, Ruivo"
                 />
               </div>
 
@@ -979,6 +1060,76 @@ function SidebarCustomEditModal({
           {/* Seção: RPG/Game */}
           <div className="border-b border-gray-200 pb-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">RPG/Game</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Classe
+                </label>
+                <input
+                  type="text"
+                  value={formData.classe}
+                  onChange={(e) => handleInputChange('classe', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: Guerreiro, Mago, Ladino"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nível
+                </label>
+                <input
+                  type="text"
+                  value={formData.nivel}
+                  onChange={(e) => handleInputChange('nivel', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                  placeholder="Ex: 15, Mestre"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Alinhamento
+                </label>
+                <select
+                  value={formData.alinhamento}
+                  onChange={(e) => handleInputChange('alinhamento', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                >
+                  <option value="">Selecione...</option>
+                  <option value="Leal e Bom">Leal e Bom</option>
+                  <option value="Neutro e Bom">Neutro e Bom</option>
+                  <option value="Caótico e Bom">Caótico e Bom</option>
+                  <option value="Leal e Neutro">Leal e Neutro</option>
+                  <option value="Neutro">Neutro</option>
+                  <option value="Caótico e Neutro">Caótico e Neutro</option>
+                  <option value="Leal e Mau">Leal e Mau</option>
+                  <option value="Neutro e Mau">Neutro e Mau</option>
+                  <option value="Caótico e Mau">Caótico e Mau</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status de Vida
+                </label>
+                <select
+                  value={formData.statusVida}
+                  onChange={(e) => handleInputChange('statusVida', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
+                >
+                  <option value="Vivo">Vivo</option>
+                  <option value="Morto">Morto</option>
+                  <option value="Desaparecido">Desaparecido</option>
+                  <option value="Inconsciente">Inconsciente</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Seção: Características */}
+          <div className="border-b border-gray-200 pb-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Características</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1405,11 +1556,19 @@ export default function CharacterPage() {
             <div className="flex flex-col gap-[8px]">
               {infoBlock("Informações", [
                 { label: "Nome:", value: character.item_title },
-                { label: "Fandom:", value: characterData.fandom || fandom.name },
-                { label: "Tipo:", value: characterData.tipo || "Personagem" },
-                { label: "Status:", value: character.is_active ? "Ativo" : "Inativo" },
-                { label: "Raça:", value: characterData.raca || "Não informado" },
+                { label: "Alias:", value: characterData.alias || "Não informado" },
                 { label: "Idade:", value: characterData.idade || "Não informado" },
+                { label: "Data de Nascimento:", value: characterData.dataNascimento || "Não informado" },
+                { label: "Gênero:", value: characterData.genero || "Não informado" },
+                { label: "Status:", value: character.is_active ? "Ativo" : "Inativo" },
+                { label: "Afiliação:", value: characterData.afiliacao || "Não informado" },
+                { label: "Espécie:", value: characterData.especie || "Não informado" },
+              ])}
+
+              {infoBlock("Aparência", [
+                { label: "Tom de Pele:", value: characterData.tomPele || "Não informado" },
+                { label: "Cor dos Olhos:", value: characterData.corOlhos || "Não informado" },
+                { label: "Cor dos Cabelos:", value: characterData.corCabelos || "Não informado" },
                 { label: "Altura:", value: characterData.altura || "Não informado" },
                 { label: "Peso:", value: characterData.peso || "Não informado" },
               ])}
@@ -1419,11 +1578,6 @@ export default function CharacterPage() {
                 { label: "Nível:", value: characterData.nivel || "Não informado" },
                 { label: "Alinhamento:", value: characterData.alinhamento || "Não informado" },
                 { label: "Status de Vida:", value: characterData.statusVida || "Vivo" },
-              ])}
-
-              {infoBlock("Aparência", [
-                { label: "Cor do Card:", value: character.item_color },
-                { label: "Ordem:", value: character.item_order.toString() },
               ])}
             </div>
 
@@ -1484,30 +1638,6 @@ export default function CharacterPage() {
               <h1 className="text-[40px] font-bold text-gray-800">{character.item_title}</h1>
             </div>
 
-            {/* Descrição */}
-            <div className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px]">
-              <div 
-                className="h-[6px] w-[40px] mb-[5px]"
-                style={{ backgroundColor: character.item_color }}
-              ></div>
-              <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Descrição</h2>
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-                {characterData.descricaoDetalhada ? (
-                  <p>{characterData.descricaoDetalhada}</p>
-                ) : (
-                  <p className="text-gray-500 italic">Esta seção exibe a descrição detalhada do personagem. Use o botão de edição (lápis) para adicionar uma descrição completa e detalhada.</p>
-                )}
-              </div>
-            </div>
-
-            {/* Quote (Citação) */}
-            <div className="flex flex-col w-full md:w-[60%] p-[20px] bg-gray-50 border-l-[5px] border-[#3E526E] gap-[10px] italic text-gray-700">
-              <p>&ldquo;{characterData.quote || 'Aqui você pode adicionar uma citação marcante do personagem.'}&rdquo;</p>
-              <div className="flex justify-end">
-                <p>— {characterData.quoteSource || character.item_title}</p>
-              </div>
-            </div>
-
             {/* Navegação das Seções */}
             <div className="flex gap-[10px] border-b-[1px] border-[#3E526E] flex-wrap">
               <a
@@ -1552,6 +1682,30 @@ export default function CharacterPage() {
               >
                 Curiosidades
               </a>
+            </div>
+
+            {/* Quote (Citação) */}
+            <div className="flex flex-col w-full md:w-[60%] p-[20px] bg-gray-50 border-l-[5px] border-[#3E526E] gap-[10px] italic text-gray-700">
+              <p>&ldquo;{characterData.quote || 'Aqui você pode adicionar uma citação marcante do personagem.'}&rdquo;</p>
+              <div className="flex justify-end">
+                <p>— {characterData.quoteSource || character.item_title}</p>
+              </div>
+            </div>
+
+            {/* Descrição */}
+            <div className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px]">
+              <div 
+                className="h-[6px] w-[40px] mb-[5px]"
+                style={{ backgroundColor: character.item_color }}
+              ></div>
+              <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Descrição</h2>
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+                {characterData.descricaoDetalhada ? (
+                  <p>{characterData.descricaoDetalhada}</p>
+                ) : (
+                  <p className="text-gray-500 italic">Esta seção exibe a descrição detalhada do personagem. Use o botão de edição (lápis) para adicionar uma descrição completa e detalhada.</p>
+                )}
+              </div>
             </div>
 
             {/* Seção: Personalidade */}
