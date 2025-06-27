@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../../../lib/supabase";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import FandomHeader from "@/components/ui/FandomHeader";
 
@@ -35,7 +35,6 @@ interface Filter {
 
 export default function ManageFiltersPage() {
   const params = useParams();
-  const router = useRouter();
   const fandomId = params.id as string;
 
   const [fandom, setFandom] = useState<Fandom | null>(null);
