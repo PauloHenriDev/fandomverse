@@ -33,16 +33,6 @@ interface FandomSection {
   custom_content: string;
 }
 
-interface SectionFilter {
-  id: string;
-  section_id: string;
-  filter_label: string;
-  filter_value: string;
-  is_active: boolean;
-  filter_order: number;
-  filter_color: string;
-}
-
 interface SectionItem {
   id: string;
   section_id: string;
@@ -53,7 +43,10 @@ interface SectionItem {
   item_color: string;
   item_order: number;
   is_active: boolean;
-  categories?: string[]; // Categorias do personagem
+  custom_data?: {
+    categories?: string[];
+    [key: string]: unknown;
+  };
 }
 
 interface Fandom {
@@ -90,7 +83,6 @@ export default function FandomPage() {
   const [fandom, setFandom] = useState<Fandom | null>(null);
   const [fandomPage, setFandomPage] = useState<FandomPage | null>(null);
   const [sections, setSections] = useState<FandomSection[]>([]);
-  const [filters, setFilters] = useState<{ [sectionId: string]: SectionFilter[] }>({});
   const [items, setItems] = useState<{ [sectionId: string]: SectionItem[] }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,7 +109,7 @@ export default function FandomPage() {
     } else {
       // Filtra por categoria específica
       const filtered = allCharacters.filter(character => 
-        character.categories?.includes(categoryId)
+        character.custom_data?.categories?.includes(categoryId)
       ).slice(0, 8); // Máximo 8 personagens
       setFilteredCharacters(filtered);
     }
@@ -189,22 +181,10 @@ export default function FandomPage() {
       } else {
         setSections(sectionsData || []);
 
-        // Carrega filtros e itens para cada seção
-        const filtersData: { [sectionId: string]: SectionFilter[] } = {};
+        // Carrega itens da seção
         const itemsData: { [sectionId: string]: SectionItem[] } = {};
 
         for (const section of sectionsData || []) {
-          // Carrega filtros da seção
-          const { data: filters, error: filtersError } = await supabase
-            .from('section_filters')
-            .select('*')
-            .eq('section_id', section.id)
-            .order('filter_order');
-
-          if (!filtersError) {
-            filtersData[section.id] = filters || [];
-          }
-
           // Carrega itens da seção
           const { data: items, error: itemsError } = await supabase
             .from('section_items')
@@ -218,7 +198,6 @@ export default function FandomPage() {
           }
         }
 
-        setFilters(filtersData);
         setItems(itemsData);
       }
 
@@ -439,7 +418,9 @@ export default function FandomPage() {
                         id={character.id}
                         title={character.item_title}
                         description={character.item_description}
+                        image_url={character.item_image_url}
                         color={character.item_color}
+                        fandomId={fandomId}
                       />
                     ))
                   ) : (
