@@ -972,19 +972,6 @@ function SidebarCustomEditModal({
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => handleInputChange('status', e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent"
-                >
-                  <option value="Ativo">Ativo</option>
-                  <option value="Inativo">Inativo</option>
-                </select>
-              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1562,7 +1549,6 @@ export default function CharacterPage() {
                 { label: "Idade:", value: characterData.idade || "Não informado" },
                 { label: "Data de Nascimento:", value: characterData.dataNascimento || "Não informado" },
                 { label: "Gênero:", value: characterData.genero || "Não informado" },
-                { label: "Status:", value: character.is_active ? "Ativo" : "Inativo" },
                 { label: "Afiliação:", value: characterData.afiliacao || "Não informado" },
                 { label: "Espécie:", value: characterData.especie || "Não informado" },
               ])}

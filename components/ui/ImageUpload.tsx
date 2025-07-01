@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
+import Cropper from 'react-easy-crop';
 
 interface ImageUploadProps {
   currentImageUrl?: string;
@@ -10,6 +11,42 @@ interface ImageUploadProps {
   folderName?: string;
   className?: string;
   disabled?: boolean;
+}
+
+// Função utilitária para crop em canvas
+function getCroppedImg(imageSrc: string, crop: any, zoom: number, aspect: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const image = new window.Image();
+    image.src = imageSrc;
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = image.naturalWidth / image.width;
+      const cropX = crop.x * scale;
+      const cropY = crop.y * scale;
+      const cropWidth = crop.width * scale;
+      const cropHeight = crop.height * scale;
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject();
+      ctx.drawImage(
+        image,
+        cropX,
+        cropY,
+        cropWidth,
+        cropHeight,
+        0,
+        0,
+        cropWidth,
+        cropHeight
+      );
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject();
+      }, 'image/jpeg');
+    };
+    image.onerror = reject;
+  });
 }
 
 export default function ImageUpload({
@@ -22,52 +59,50 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showCrop, setShowCrop] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [rawImage, setRawImage] = useState<string | null>(null);
+
+  const onCropComplete = useCallback((_, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validação do arquivo
     if (!file.type.startsWith('image/')) {
       alert('Por favor, selecione apenas arquivos de imagem.');
       return;
     }
-
-    if (file.size > 5 * 1024 * 1024) { // 5MB
+    if (file.size > 5 * 1024 * 1024) {
       alert('A imagem deve ter menos de 5MB.');
       return;
     }
+    setRawImage(URL.createObjectURL(file));
+    setShowCrop(true);
+  };
 
+  const handleCropSave = async () => {
+    if (!rawImage || !croppedAreaPixels) return;
     setUploading(true);
-
     try {
-      // Gera nome único para o arquivo
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      
-      // Upload da imagem para o storage do Supabase
+      const croppedBlob = await getCroppedImg(rawImage, croppedAreaPixels, zoom, 1);
+      const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpeg`;
       const { error: uploadError } = await supabase.storage
         .from(bucketName)
-        .upload(fileName, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Gera URL pública da imagem
+        .upload(fileName, croppedBlob);
+      if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage
         .from(bucketName)
         .getPublicUrl(fileName);
-
-      // Cria preview temporário
-      setPreviewUrl(URL.createObjectURL(file));
-      
-      // Chama callback com a nova URL
+      setPreviewUrl(URL.createObjectURL(croppedBlob));
       onImageUploaded(publicUrl);
-      
-    } catch (error: unknown) {
-      console.error('Erro no upload:', error);
-      alert('Erro ao fazer upload da imagem. Tente novamente.');
+      setShowCrop(false);
+      setRawImage(null);
+    } catch (error) {
+      alert('Erro ao fazer upload da imagem recortada.');
     } finally {
       setUploading(false);
     }
@@ -82,6 +117,51 @@ export default function ImageUpload({
 
   return (
     <div className={`space-y-4 ${className}`}>
+      {/* Modal de Crop */}
+      {showCrop && rawImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md flex flex-col items-center">
+            <div className="relative w-72 h-72 bg-gray-100">
+              <Cropper
+                image={rawImage}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+            <div className="flex gap-4 mt-4 w-full items-center">
+              <label className="flex-1 text-xs">Zoom
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.01}
+                  value={zoom}
+                  onChange={e => setZoom(Number(e.target.value))}
+                  className="w-full"
+                />
+              </label>
+              <button
+                className="bg-[#926DF6] text-white px-4 py-2 rounded hover:bg-[#A98AF8] transition-colors"
+                onClick={handleCropSave}
+                disabled={uploading}
+              >
+                {uploading ? 'Salvando...' : 'Salvar'}
+              </button>
+              <button
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition-colors"
+                onClick={() => { setShowCrop(false); setRawImage(null); }}
+                disabled={uploading}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Preview da imagem */}
       {displayImage && (
         <div className="relative">
@@ -104,13 +184,11 @@ export default function ImageUpload({
           )}
         </div>
       )}
-
       {/* Input de upload */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
           {displayImage ? 'Alterar Imagem' : 'Adicionar Imagem'}
         </label>
-        
         <div className="flex items-center space-x-4">
           <label className={`flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#926DF6] cursor-pointer transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +203,6 @@ export default function ImageUpload({
               disabled={disabled || uploading}
             />
           </label>
-          
           {uploading && (
             <div className="flex items-center text-sm text-gray-500">
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#926DF6] mr-2"></div>
@@ -133,7 +210,6 @@ export default function ImageUpload({
             </div>
           )}
         </div>
-        
         <p className="text-xs text-gray-500">
           Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 5MB.
         </p>
