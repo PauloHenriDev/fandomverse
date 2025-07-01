@@ -61,6 +61,7 @@ export default {
   },
   plugins: [
     require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
     function({ addUtilities }: any) {
       addUtilities({
         '.scrollbar-hide': {

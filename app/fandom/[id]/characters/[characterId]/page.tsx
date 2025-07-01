@@ -8,6 +8,9 @@ import Image from "next/image";
 import FandomHeader from "@/components/ui/FandomHeader";
 import { User } from "@supabase/supabase-js";
 import ImageUpload from "@/components/ui/ImageUpload";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import LinkExtension from '@tiptap/extension-link';
 
 // Interfaces para os dados
 interface Fandom {
@@ -267,7 +270,7 @@ function SidebarInfoEditModal({
         title: character.item_title,
         color: character.item_color,
         order: character.item_order,
-        is_active: character.is_active
+        is_active: true
       });
     }
   }, [character, isOpen]);
@@ -286,7 +289,7 @@ function SidebarInfoEditModal({
           item_title: formData.title,
           item_color: formData.color,
           item_order: formData.order,
-          is_active: formData.is_active
+          is_active: true
         })
         .eq('id', character.id);
 
@@ -301,7 +304,7 @@ function SidebarInfoEditModal({
         item_title: formData.title,
         item_color: formData.color,
         item_order: formData.order,
-        is_active: formData.is_active
+        is_active: true
       });
 
       setTimeout(() => {
@@ -397,19 +400,6 @@ function SidebarInfoEditModal({
             <p className="text-xs text-gray-500 mt-1">Define a ordem em que o personagem aparece na lista.</p>
           </div>
 
-          <div>
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={formData.is_active}
-                onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                className="rounded border-gray-300 text-[#926DF6] focus:ring-[#926DF6]"
-              />
-              <span className="text-xs sm:text-sm font-medium text-gray-700">Personagem Ativo</span>
-            </label>
-            <p className="text-xs text-gray-500 mt-1">Personagens inativos não aparecem nas listagens.</p>
-          </div>
-
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               type="submit"
@@ -429,6 +419,64 @@ function SidebarInfoEditModal({
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+// Adiciona um componente EditorTiptap para uso nos campos de texto longo
+function EditorTiptap({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const editor = useEditor({
+    extensions: [StarterKit, LinkExtension],
+    content: value,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
+  });
+
+  if (!editor) return null;
+
+  return (
+    <div className="border border-gray-300 rounded-lg p-2 bg-white">
+      {/* Toolbar visual com ícones */}
+      <div className="flex flex-wrap gap-1 mb-2 items-center bg-gray-50 rounded-md px-2 py-1 shadow-sm border border-gray-200">
+        {/* Bold */}
+        <button type="button" title="Negrito" onClick={() => editor.chain().focus().toggleBold().run()} className={`p-1 rounded hover:bg-gray-200 ${editor.isActive('bold') ? 'bg-[#926DF6]/20 text-[#926DF6]' : 'text-gray-700'}`}> 
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.25 8.5A3.75 3.75 0 0 0 13.5 4.75h-3.75v14.5H14a3.75 3.75 0 0 0 3.25-6.25A3.75 3.75 0 0 0 17.25 8.5Z"/></svg>
+        </button>
+        {/* Italic */}
+        <button type="button" title="Itálico" onClick={() => editor.chain().focus().toggleItalic().run()} className={`p-1 rounded hover:bg-gray-200 ${editor.isActive('italic') ? 'bg-[#926DF6]/20 text-[#926DF6]' : 'text-gray-700'}`}> 
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 4h-9M14 20H5M15 4l-6 16"/></svg>
+        </button>
+        {/* Separator */}
+        <span className="mx-1 w-px h-5 bg-gray-200" />
+        {/* Bullet List */}
+        <button type="button" title="Lista não ordenada" onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-1 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-[#926DF6]/20 text-[#926DF6]' : 'text-gray-700'}`}> 
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="6" cy="7" r="1.5"/><circle cx="6" cy="12" r="1.5"/><circle cx="6" cy="17" r="1.5"/><line x1="10" y1="7" x2="20" y2="7"/><line x1="10" y1="12" x2="20" y2="12"/><line x1="10" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        {/* Ordered List */}
+        <button type="button" title="Lista ordenada" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`p-1 rounded hover:bg-gray-200 ${editor.isActive('orderedList') ? 'bg-[#926DF6]/20 text-[#926DF6]' : 'text-gray-700'}`}> 
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><text x="3" y="9" fontSize="8">1.</text><text x="3" y="14" fontSize="8">2.</text><text x="3" y="19" fontSize="8">3.</text><line x1="10" y1="7" x2="20" y2="7"/><line x1="10" y1="12" x2="20" y2="12"/><line x1="10" y1="17" x2="20" y2="17"/></svg>
+        </button>
+        {/* Separator */}
+        <span className="mx-1 w-px h-5 bg-gray-200" />
+        {/* Link */}
+        <button type="button" title="Adicionar/Editar Link" onClick={() => {
+          const previousUrl = editor.getAttributes('link').href || '';
+          const url = window.prompt('URL do link:', previousUrl);
+          if (url === null) return;
+          if (url === '') {
+            editor.chain().focus().unsetLink().run();
+            return;
+          }
+          editor.chain().focus().setLink({ href: url }).run();
+        }} className={`p-1 rounded hover:bg-gray-200 ${editor.isActive('link') ? 'bg-[#926DF6]/20 text-[#926DF6]' : 'text-gray-700'}`}> 
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 1 7 7l-3 3a5 5 0 0 1-7-7l1-1"/><path d="M14 11a5 5 0 0 0-7-7l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+        </button>
+        <button type="button" title="Remover Link" onClick={() => editor.chain().focus().unsetLink().run()} className={`p-1 rounded hover:bg-gray-200 ${editor.isActive('link') ? 'text-[#926DF6]' : 'text-gray-700'}`}> 
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 7l-7 7"/><path d="M7 17l7-7"/></svg>
+        </button>
+      </div>
+      <EditorContent editor={editor} className="prose prose-sm prose-a:underline focus:outline-none focus:ring-0 focus:border-0 border-0" />
     </div>
   );
 }
@@ -558,14 +606,11 @@ function MainContentEditModal({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Descrição Detalhada (Ficha Principal)
             </label>
-            <textarea
+            <EditorTiptap
               value={formData.descricaoDetalhada}
-              onChange={(e) => handleInputChange('descricaoDetalhada', e.target.value)}
-              rows={4}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
-              placeholder="Descrição detalhada que aparece na seção principal da ficha..."
+              onChange={v => handleInputChange('descricaoDetalhada', v)}
             />
-            <p className="text-xs text-gray-500 mt-1">Esta descrição aparece na seção principal da ficha, separada da descrição curta da sidebar.</p>
+            <div className="prose prose-sm prose-a:underline text-gray-500 italic w-full max-w-full break-words">Esta descrição aparece na seção principal da ficha, separada da descrição curta da sidebar.</div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -573,12 +618,9 @@ function MainContentEditModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Personalidade
               </label>
-              <textarea
+              <EditorTiptap
                 value={formData.personalidade}
-                onChange={(e) => handleInputChange('personalidade', e.target.value)}
-                rows={3}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
-                placeholder="Descreva a personalidade do personagem..."
+                onChange={v => handleInputChange('personalidade', v)}
               />
             </div>
 
@@ -586,12 +628,9 @@ function MainContentEditModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Aparência
               </label>
-              <textarea
+              <EditorTiptap
                 value={formData.aparencia}
-                onChange={(e) => handleInputChange('aparencia', e.target.value)}
-                rows={3}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
-                placeholder="Descreva as características físicas..."
+                onChange={v => handleInputChange('aparencia', v)}
               />
             </div>
 
@@ -599,12 +638,9 @@ function MainContentEditModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Habilidades e Poderes
               </label>
-              <textarea
+              <EditorTiptap
                 value={formData.habilidades}
-                onChange={(e) => handleInputChange('habilidades', e.target.value)}
-                rows={3}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
-                placeholder="Liste as habilidades especiais..."
+                onChange={v => handleInputChange('habilidades', v)}
               />
             </div>
 
@@ -612,12 +648,9 @@ function MainContentEditModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Equipamentos
               </label>
-              <textarea
+              <EditorTiptap
                 value={formData.equipamentos}
-                onChange={(e) => handleInputChange('equipamentos', e.target.value)}
-                rows={3}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
-                placeholder="Descreva armas, armaduras, itens..."
+                onChange={v => handleInputChange('equipamentos', v)}
               />
             </div>
 
@@ -625,12 +658,9 @@ function MainContentEditModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Background
               </label>
-              <textarea
+              <EditorTiptap
                 value={formData.background}
-                onChange={(e) => handleInputChange('background', e.target.value)}
-                rows={3}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
-                placeholder="Conte a história de fundo..."
+                onChange={v => handleInputChange('background', v)}
               />
             </div>
 
@@ -638,27 +668,21 @@ function MainContentEditModal({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Relacionamentos
               </label>
-              <textarea
+              <EditorTiptap
                 value={formData.relacionamentos}
-                onChange={(e) => handleInputChange('relacionamentos', e.target.value)}
-                rows={3}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
-                placeholder="Descreva família, amigos, inimigos..."
+                onChange={v => handleInputChange('relacionamentos', v)}
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Curiosidades
-            </label>
-            <textarea
-              value={formData.curiosidades}
-              onChange={(e) => handleInputChange('curiosidades', e.target.value)}
-              rows={3}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#926DF6] focus:border-transparent resize-none"
-              placeholder="Adicione fatos interessantes e curiosidades..."
-            />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Curiosidades
+              </label>
+              <EditorTiptap
+                value={formData.curiosidades}
+                onChange={v => handleInputChange('curiosidades', v)}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1397,7 +1421,7 @@ export default function CharacterPage() {
         item_title: updatedData.item_title,
         item_color: updatedData.item_color,
         item_order: updatedData.item_order,
-        is_active: updatedData.is_active
+        is_active: true
       });
     }
   };
@@ -1487,21 +1511,6 @@ export default function CharacterPage() {
         fandomId={fandomId}
         creatorId={fandom.creator_id}
       />
-
-      {/* Navegação */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center gap-3 mb-4">
-          <Link 
-            href={`/fandom/${fandomId}/characters`}
-            className="text-[#926DF6] hover:text-[#A98AF8] transition-colors text-sm sm:text-base flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Voltar para Personagens
-          </Link>
-        </div>
-      </div>
 
       {/* Conteúdo Principal - Layout com Sidebar */}
       <main className="flex flex-col sm:flex-row flex-wrap w-full transition-colors duration-300">
@@ -1608,7 +1617,7 @@ export default function CharacterPage() {
 
         {/* Conteúdo Principal */}
         <div className="flex w-full sm:w-1/2 lg:w-4/5 p-[20px] justify-center">
-          <div className="flex flex-col rounded-[10px] bg-white w-[80%] p-[20px] gap-[40px] shadow-lg relative">
+          <div className="flex flex-col rounded-[10px] bg-white w-full p-[20px] gap-[40px] shadow-lg relative">
             
             {/* Botão de Edição do Conteúdo Principal */}
             {user?.id === fandom.creator_id && (
@@ -1686,17 +1695,17 @@ export default function CharacterPage() {
             </div>
 
             {/* Descrição */}
-            <div className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px]">
+            <div className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] w-full">
               <div 
                 className="h-[6px] w-[40px] mb-[5px]"
                 style={{ backgroundColor: character.item_color }}
               ></div>
               <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Descrição</h2>
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed max-w-full break-words">
                 {characterData.descricaoDetalhada ? (
-                  <p>{characterData.descricaoDetalhada}</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-700 leading-relaxed max-w-full break-words" dangerouslySetInnerHTML={{ __html: characterData.descricaoDetalhada }} />
                 ) : (
-                  <p className="text-gray-500 italic">Esta seção exibe a descrição detalhada do personagem. Use o botão de edição (lápis) para adicionar uma descrição completa e detalhada.</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-500 italic w-full max-w-full break-words">Esta seção exibe a descrição detalhada do personagem. Use o botão de edição (lápis) para adicionar uma descrição completa e detalhada.</div>
                 )}
               </div>
             </div>
@@ -1704,18 +1713,18 @@ export default function CharacterPage() {
             {/* Seção: Personalidade */}
             <div
               id="personalidade"
-              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] scroll-mt-[100px]"
+              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] w-full"
             >
               <div 
                 className="h-[6px] w-[40px] mb-[5px]"
                 style={{ backgroundColor: character.item_color }}
               ></div>
               <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Personalidade</h2>
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed max-w-full break-words">
                 {characterData.personalidade ? (
-                  <p>{characterData.personalidade}</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-700 leading-relaxed max-w-full break-words" dangerouslySetInnerHTML={{ __html: characterData.personalidade }} />
                 ) : (
-                  <p className="text-gray-500 italic">Descreva aqui a personalidade do personagem, seus traços de caráter, comportamentos típicos, valores e crenças.</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-500 italic w-full max-w-full break-words">Descreva aqui a personalidade do personagem, seus traços de caráter, comportamentos típicos, valores e crenças.</div>
                 )}
               </div>
             </div>
@@ -1723,18 +1732,18 @@ export default function CharacterPage() {
             {/* Seção: Aparência */}
             <div
               id="aparencia"
-              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] scroll-mt-[100px]"
+              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] w-full"
             >
               <div 
                 className="h-[6px] w-[40px] mb-[5px]"
                 style={{ backgroundColor: character.item_color }}
               ></div>
               <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Aparência</h2>
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed max-w-full break-words">
                 {characterData.aparencia ? (
-                  <p>{characterData.aparencia}</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-700 leading-relaxed max-w-full break-words" dangerouslySetInnerHTML={{ __html: characterData.aparencia }} />
                 ) : (
-                  <p className="text-gray-500 italic">Descreva aqui as características físicas do personagem: altura, peso, cor dos olhos, cabelo, características distintivas, etc.</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-500 italic w-full max-w-full break-words">Descreva aqui as características físicas do personagem: altura, peso, cor dos olhos, cabelo, características distintivas, etc.</div>
                 )}
               </div>
             </div>
@@ -1742,18 +1751,18 @@ export default function CharacterPage() {
             {/* Seção: Habilidades e Poderes */}
             <div
               id="habilidades"
-              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] scroll-mt-[100px]"
+              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] w-full"
             >
               <div 
                 className="h-[6px] w-[40px] mb-[5px]"
                 style={{ backgroundColor: character.item_color }}
               ></div>
               <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Habilidades e Poderes</h2>
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed max-w-full break-words">
                 {characterData.habilidades ? (
-                  <p>{characterData.habilidades}</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-700 leading-relaxed max-w-full break-words" dangerouslySetInnerHTML={{ __html: characterData.habilidades }} />
                 ) : (
-                  <p className="text-gray-500 italic">Liste aqui as habilidades especiais, poderes, talentos e capacidades únicas do personagem.</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-500 italic w-full max-w-full break-words">Liste aqui as habilidades especiais, poderes, talentos e capacidades únicas do personagem.</div>
                 )}
               </div>
             </div>
@@ -1761,18 +1770,18 @@ export default function CharacterPage() {
             {/* Seção: Equipamentos */}
             <div
               id="equipamentos"
-              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] scroll-mt-[100px]"
+              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] w-full"
             >
               <div 
                 className="h-[6px] w-[40px] mb-[5px]"
                 style={{ backgroundColor: character.item_color }}
               ></div>
               <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Equipamentos</h2>
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed max-w-full break-words">
                 {characterData.equipamentos ? (
-                  <p>{characterData.equipamentos}</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-700 leading-relaxed max-w-full break-words" dangerouslySetInnerHTML={{ __html: characterData.equipamentos }} />
                 ) : (
-                  <p className="text-gray-500 italic">Descreva aqui as armas, armaduras, itens especiais e equipamentos que o personagem utiliza.</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-500 italic w-full max-w-full break-words">Descreva aqui as armas, armaduras, itens especiais e equipamentos que o personagem utiliza.</div>
                 )}
               </div>
             </div>
@@ -1780,16 +1789,16 @@ export default function CharacterPage() {
             {/* Seção: Background */}
             <div
               id="background"
-              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] scroll-mt-[100px]"
+              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] w-full"
             >
               <div 
                 className="h-[6px] w-[40px] mb-[5px]"
                 style={{ backgroundColor: character.item_color }}
               ></div>
               <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Background</h2>
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed max-w-full break-words">
                 {characterData.background ? (
-                  <p>{characterData.background}</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-700 leading-relaxed max-w-full break-words" dangerouslySetInnerHTML={{ __html: characterData.background }} />
                 ) : (
                   <p className="text-gray-500 italic">Conte aqui a história de fundo do personagem: sua origem, passado, eventos importantes que moldaram quem ele é hoje.</p>
                 )}
@@ -1799,16 +1808,16 @@ export default function CharacterPage() {
             {/* Seção: Relacionamentos */}
             <div
               id="relacionamentos"
-              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] scroll-mt-[100px]"
+              className="flex flex-col border-b-[1px] border-[#3E526E] pb-[40px] w-full"
             >
               <div 
                 className="h-[6px] w-[40px] mb-[5px]"
                 style={{ backgroundColor: character.item_color }}
               ></div>
               <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Relacionamentos</h2>
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed max-w-full break-words">
                 {characterData.relacionamentos ? (
-                  <p>{characterData.relacionamentos}</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-700 leading-relaxed max-w-full break-words" dangerouslySetInnerHTML={{ __html: characterData.relacionamentos }} />
                 ) : (
                   <p className="text-gray-500 italic">Descreva aqui os relacionamentos do personagem: família, amigos, aliados, inimigos e outras conexões importantes.</p>
                 )}
@@ -1825,43 +1834,25 @@ export default function CharacterPage() {
                 style={{ backgroundColor: character.item_color }}
               ></div>
               <h2 className="text-[25px] w-fit font-bold text-gray-800 mb-4">Curiosidades</h2>
-              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed max-w-full break-words">
                 {characterData.curiosidades ? (
-                  <p>{characterData.curiosidades}</p>
+                  <div className="prose prose-sm prose-a:underline text-gray-700 leading-relaxed max-w-full break-words" dangerouslySetInnerHTML={{ __html: characterData.curiosidades }} />
                 ) : (
                   <p className="text-gray-500 italic">Adicione aqui fatos interessantes, detalhes curiosos, manias, preferências e outras informações divertidas sobre o personagem.</p>
                 )}
               </div>
             </div>
-
-            {/* Botões de Ação */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
-              <Link
-                href={`/fandom/${fandomId}/characters`}
-                className="bg-gray-100 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors text-center font-medium"
-              >
-                Ver Todos os Personagens
-              </Link>
-              <Link
-                href={`/fandom/${fandomId}`}
-                className="bg-[#926DF6] text-white px-6 py-3 rounded-lg hover:bg-[#A98AF8] transition-colors text-center font-medium"
-              >
-                Voltar para {fandom.name}
-              </Link>
-            </div>
           </div>
         </div>
       </main>
 
-      {/* Modal para editar informações da sidebar */}
+      {/* Modais de edição */}
       <SidebarEditModal
         isOpen={showSidebarEditModal}
         onClose={() => setShowSidebarEditModal(false)}
         character={character}
         onSave={handleSidebarEditSave}
       />
-
-      {/* Modal para editar conteúdo principal */}
       <MainContentEditModal
         isOpen={showMainContentEditModal}
         onClose={() => setShowMainContentEditModal(false)}
@@ -1869,16 +1860,12 @@ export default function CharacterPage() {
         characterData={characterData}
         onSave={handleMainContentEditSave}
       />
-
-      {/* Modal para editar informações da sidebar */}
       <SidebarInfoEditModal
         isOpen={showSidebarInfoEditModal}
         onClose={() => setShowSidebarInfoEditModal(false)}
         character={character}
         onSave={handleSidebarInfoEditSave}
       />
-
-      {/* Modal para editar sidebar com campos customizáveis */}
       <SidebarCustomEditModal
         isOpen={showSidebarCustomEditModal}
         onClose={() => setShowSidebarCustomEditModal(false)}
@@ -1888,4 +1875,4 @@ export default function CharacterPage() {
       />
     </div>
   );
-} 
+}
