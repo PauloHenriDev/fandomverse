@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
-import Cropper from 'react-easy-crop';
+import Cropper, { Area } from 'react-easy-crop';
 import Image from 'next/image';
 
 interface ImageUploadProps {
@@ -14,8 +14,16 @@ interface ImageUploadProps {
   disabled?: boolean;
 }
 
+// Define a type for crop area
+interface CropArea {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 // Função utilitária para crop em canvas
-function getCroppedImg(imageSrc: string, crop: any, zoom: number, aspect: number): Promise<Blob> {
+function getCroppedImg(imageSrc: string, crop: CropArea): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const image = new window.Image();
     image.src = imageSrc;
@@ -61,12 +69,12 @@ export default function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showCrop, setShowCrop] = useState(false);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [crop, setCrop] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [rawImage, setRawImage] = useState<string | null>(null);
 
-  const onCropComplete = useCallback((_, croppedAreaPixels) => {
+  const onCropComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
   }, []);
 
@@ -89,7 +97,7 @@ export default function ImageUpload({
     if (!rawImage || !croppedAreaPixels) return;
     setUploading(true);
     try {
-      const croppedBlob = await getCroppedImg(rawImage, croppedAreaPixels, zoom, 1);
+      const croppedBlob = await getCroppedImg(rawImage, croppedAreaPixels);
       const fileName = `${folderName}/${Date.now()}-${Math.random().toString(36).substring(2)}.jpeg`;
       const { error: uploadError } = await supabase.storage
         .from(bucketName)
@@ -102,7 +110,7 @@ export default function ImageUpload({
       onImageUploaded(publicUrl);
       setShowCrop(false);
       setRawImage(null);
-    } catch (error) {
+    } catch {
       alert('Erro ao fazer upload da imagem recortada.');
     } finally {
       setUploading(false);
