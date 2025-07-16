@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../../../lib/supabase";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import FandomHeader from "@/components/ui/FandomHeader";
 import { CardGrid } from "@/components/templates";

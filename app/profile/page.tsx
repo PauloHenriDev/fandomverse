@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
@@ -136,38 +136,8 @@ export default function ProfilePage() {
 
   const router = useRouter();
 
-  // Hook que executa quando o componente é montado
-  useEffect(() => {
-    // Verifica se o usuário está logado
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) {
-        // Se não estiver logado, redireciona para login
-        router.push("/auth/login");
-        return;
-      }
-      setUser(user);
-      // Carrega dados do perfil se existirem
-      loadProfile(user.id);
-      // Carrega fandoms do usuário
-      loadUserFandoms(user.id);
-    });
-  }, [router, loadProfile]);
-
-  useEffect(() => {
-    if (user) {
-      loadFollowedFandoms(user.id);
-      loadFollowersCount(user.id);
-      loadFollowingCount(user.id);
-      loadTotalPosts(user.id);
-      loadUserPosts(user.id);
-    }
-  }, [router, user]);
-
-  /**
-   * Carrega os dados do perfil do usuário do banco de dados
-   * @param userId - ID do usuário logado
-   */
-  const loadProfile = async (userId: string) => {
+  // Função de carregar perfil precisa vir antes do useEffect!
+  const loadProfile = useCallback(async (userId: string) => {
     try {
       // Primeiro, tenta carregar o nickname do metadata do usuário
       const { data: { user: currentUser } } = await supabase.auth.getUser();
@@ -211,7 +181,34 @@ export default function ProfilePage() {
         setNickname(currentUser.user_metadata.nickname);
       }
     }
-  };
+  }, [nickname]);
+
+  // Hook que executa quando o componente é montado
+  useEffect(() => {
+    // Verifica se o usuário está logado
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) {
+        // Se não estiver logado, redireciona para login
+        router.push("/auth/login");
+        return;
+      }
+      setUser(user);
+      // Carrega dados do perfil se existirem
+      loadProfile(user.id);
+      // Carrega fandoms do usuário
+      loadUserFandoms(user.id);
+    });
+  }, [router, loadProfile]);
+
+  useEffect(() => {
+    if (user) {
+      loadFollowedFandoms(user.id);
+      loadFollowersCount(user.id);
+      loadFollowingCount(user.id);
+      loadTotalPosts(user.id);
+      loadUserPosts(user.id);
+    }
+  }, [router, user]);
 
   /**
    * Carrega as fandoms criadas pelo usuário
