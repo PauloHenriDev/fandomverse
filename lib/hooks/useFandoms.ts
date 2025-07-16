@@ -34,7 +34,7 @@ export function useFandoms() {
         }
 
         // Para cada fandom, busca o número de seguidores e de posts
-        const fandomsWithCounts = await Promise.all((data || []).map(async (fandom: Fandom) => {
+        const fandomsWithCounts = await Promise.all((data as Fandom[]).map(async (fandom) => {
           // Contar seguidores
           const { count: followersCount } = await supabase
             .from('fandom_followers')

@@ -46,7 +46,7 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
     return () => {
       listener?.subscription.unsubscribe();
     };
-  }, [fandomId]);
+  }, [fandomId, checkIfFollowing]);
 
   const loadUserProfile = async (userId: string) => {
     const { data } = await supabase

@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../../lib/supabase';
 import Cropper from 'react-easy-crop';
+import Image from 'next/image';
 
 interface ImageUploadProps {
   currentImageUrl?: string;
@@ -165,11 +166,7 @@ export default function ImageUpload({
       {/* Preview da imagem */}
       {displayImage && (
         <div className="relative">
-          <img
-            src={displayImage}
-            alt="Preview"
-            className="w-full h-48 object-cover rounded-lg border-2 border-gray-200"
-          />
+          <Image src={displayImage} alt="Preview" width={300} height={200} className="w-full h-auto rounded" unoptimized />
           {!disabled && (
             <button
               type="button"

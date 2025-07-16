@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface CharacterCardProps {
   id: string;
@@ -48,12 +49,15 @@ export default function CharacterCard({
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#926DF6]"></div>
               </div>
             )}
-            <img 
+            <Image 
               src={image_url} 
               alt={title}
+              width={300}
+              height={160}
               className="w-full h-full object-cover"
               onError={handleImageError}
               onLoad={handleImageLoad}
+              unoptimized
             />
           </>
         ) : (

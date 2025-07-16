@@ -1,5 +1,6 @@
 import { Fandom } from '@/lib/hooks/useFandoms';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface FamdomCardProps {
   fandom: Fandom;
@@ -11,10 +12,13 @@ export default function FamdomCard({ fandom }: FamdomCardProps) {
         {/* Imagem do Famdom */}
         <div className="flex justify-center items-center bg-red-500 rounded-t-[15px] w-[300px] h-[150px]">
             {fandom.image_url ? (
-              <img 
-                src={fandom.image_url} 
+              <Image
+                src={fandom.image_url}
                 alt={fandom.name}
+                width={300}
+                height={150}
                 className="w-full h-full object-cover rounded-t-[15px]"
+                unoptimized
               />
             ) : (
               <div className="text-white text-center">
