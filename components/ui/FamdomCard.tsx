@@ -37,11 +37,11 @@ export default function FamdomCard({ fandom }: FamdomCardProps) {
             <div className="flex mt-[10px] gap-[20px] text-[#DBD1FC]">
                 <div className="flex gap-[5px]">
                     <p>Membros</p>
-                    <p>100</p>
+                    <p>{fandom.followersCount ?? 0}</p>
                 </div>
                 <div className="flex gap-[5px]">
-                    <p>Discussões</p>
-                    <p>50</p>
+                    <p>Posts</p>
+                    <p>{fandom.postsCount ?? 0}</p>
                 </div>
             </div>
             <div className="w-[100%] mt-[10px] mb-[30px]">

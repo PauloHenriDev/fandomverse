@@ -166,3 +166,22 @@ Após configurar o banco de dados, você pode:
 5. Configurar a seção de raças/espécies
 6. Adicionar raças personalizadas via interface
 7. Testar o sistema de filtros por categoria 
+
+---
+
+## Tabela de seguidores de fandoms
+
+```sql
+CREATE TABLE IF NOT EXISTS public.fandom_followers (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    fandom_id uuid REFERENCES public.fandoms(id) ON DELETE CASCADE,
+    user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE,
+    created_at timestamp with time zone DEFAULT timezone('utc'::text, now()),
+    UNIQUE (fandom_id, user_id)
+);
+```
+
+- `fandom_id`: ID da fandom seguida
+- `user_id`: ID do usuário que está seguindo
+- `created_at`: data/hora do follow
+- UNIQUE para evitar seguir duas vezes a mesma fandom 

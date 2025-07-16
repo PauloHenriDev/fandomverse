@@ -17,6 +17,8 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
   const [user, setUser] = useState<User | null>(null);
   const [nickname, setNickname] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
+  const [loadingFollow, setLoadingFollow] = useState<boolean>(false);
 
   useEffect(() => {
     // Verifica usuário atual
@@ -24,6 +26,7 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
       setUser(user);
       if (user) {
         loadUserProfile(user.id);
+        checkIfFollowing(user.id);
       }
     });
 
@@ -32,16 +35,18 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
       setUser(session?.user ?? null);
       if (session?.user) {
         loadUserProfile(session.user.id);
+        checkIfFollowing(session.user.id);
       } else {
         setNickname(null);
         setAvatarUrl(null);
+        setIsFollowing(false);
       }
     });
 
     return () => {
       listener?.subscription.unsubscribe();
     };
-  }, []);
+  }, [fandomId]);
 
   const loadUserProfile = async (userId: string) => {
     const { data } = await supabase
@@ -54,6 +59,42 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
       if (data.nickname) setNickname(data.nickname);
       if (data.avatar_url) setAvatarUrl(data.avatar_url);
     }
+  };
+
+  // Verifica se o usuário já segue a fandom
+  const checkIfFollowing = async (userId: string) => {
+    if (!fandomId || !userId) return;
+    const { data, error } = await supabase
+      .from('fandom_followers')
+      .select('id')
+      .eq('fandom_id', fandomId)
+      .eq('user_id', userId)
+      .single();
+    setIsFollowing(!!data && !error);
+  };
+
+  // Seguir fandom
+  const handleFollow = async () => {
+    if (!user) return;
+    setLoadingFollow(true);
+    const { error } = await supabase
+      .from('fandom_followers')
+      .insert({ fandom_id: fandomId, user_id: user.id });
+    if (!error) setIsFollowing(true);
+    setLoadingFollow(false);
+  };
+
+  // Deixar de seguir fandom
+  const handleUnfollow = async () => {
+    if (!user) return;
+    setLoadingFollow(true);
+    const { error } = await supabase
+      .from('fandom_followers')
+      .delete()
+      .eq('fandom_id', fandomId)
+      .eq('user_id', user.id);
+    if (!error) setIsFollowing(false);
+    setLoadingFollow(false);
   };
 
   return (
@@ -69,12 +110,34 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
         
         {/* Informações da fandom */}
         <div className="flex flex-col">
-          <Link 
-            href={`/fandom/${fandomId}`}
-            className="text-[24px] font-bold truncate max-w-[300px] cursor-pointer"
-          >
-            {fandomName}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link 
+              href={`/fandom/${fandomId}`}
+              className="text-[24px] font-bold truncate max-w-[300px] cursor-pointer"
+            >
+              {fandomName}
+            </Link>
+            {/* Botão Seguir/Deixar de seguir */}
+            {user && user.id !== creatorId && (
+              isFollowing ? (
+                <button
+                  onClick={handleUnfollow}
+                  disabled={loadingFollow}
+                  className="ml-2 px-3 py-1 rounded bg-white text-[#926DF6] font-semibold hover:bg-[#E0E7FF] transition-colors text-sm border border-[#926DF6]"
+                >
+                  {loadingFollow ? '...' : 'Deixar de seguir'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleFollow}
+                  disabled={loadingFollow}
+                  className="ml-2 px-3 py-1 rounded bg-[#A98AF8] text-white font-semibold hover:bg-[#AE9AF8] transition-colors text-sm"
+                >
+                  {loadingFollow ? '...' : 'Seguir'}
+                </button>
+              )
+            )}
+          </div>
           <p className="text-[14px] text-[#E3DBFC] truncate max-w-[300px]">{fandomDescription}</p>
         </div>
       </div>

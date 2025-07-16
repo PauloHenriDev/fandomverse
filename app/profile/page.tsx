@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { UserFandomsSection } from "@/components/templates";
 import Header from "@/components/ui/Header";
+import Link from "next/link";
 
 // Interface que define a estrutura de uma fandom
 interface Fandom {
@@ -37,7 +38,34 @@ interface ProfileSettings {
 }
 
 // Tipo para as seções disponíveis
-type ActiveSection = 'visao-geral' | 'fandoms' | 'publicacoes' | 'seguidores' | 'seguindo' | 'amigos' | 'conquistas' | 'configuracoes';
+type ActiveSection = 'visao-geral' | 'fandoms' | 'publicacoes' | 'seguindo' | 'configuracoes';
+
+// | 'amigos' | 'conquistas'
+
+interface FandomDB {
+  id: string;
+  name?: string;
+}
+interface PageDB {
+  id: string;
+  fandom_id: string;
+}
+interface SectionDB {
+  id: string;
+  fandom_page_id: string;
+  section_title?: string;
+}
+interface ItemDB {
+  id: string;
+  section_id: string;
+  item_title: string;
+  item_description?: string;
+  item_image_url?: string;
+  created_at?: string;
+  sectionTitle?: string;
+  fandomId?: string;
+  fandomName?: string;
+}
 
 /**
  * Página de perfil do usuário
@@ -59,6 +87,14 @@ export default function ProfilePage() {
   // Estados para gerenciar fandoms do usuário
   const [userFandoms, setUserFandoms] = useState<Fandom[]>([]);
   const [loadingFandoms, setLoadingFandoms] = useState(false);
+  // Estado para fandoms seguidas
+  const [followedFandoms, setFollowedFandoms] = useState<Fandom[]>([]);
+  const [loadingFollowed, setLoadingFollowed] = useState(false);
+  const [followersCount, setFollowersCount] = useState<number>(0);
+  const [followingCount, setFollowingCount] = useState<number>(0);
+  const [totalPosts, setTotalPosts] = useState<number>(0);
+  const [userPosts, setUserPosts] = useState<ItemDB[]>([]);
+  const [loadingUserPosts, setLoadingUserPosts] = useState(false);
   
   // Estados para o modal de edição
   const [showEditModal, setShowEditModal] = useState(false);
@@ -116,6 +152,16 @@ export default function ProfilePage() {
       loadUserFandoms(user.id);
     });
   }, [router]);
+
+  useEffect(() => {
+    if (user) {
+      loadFollowedFandoms(user.id);
+      loadFollowersCount(user.id);
+      loadFollowingCount(user.id);
+      loadTotalPosts(user.id);
+      loadUserPosts(user.id);
+    }
+  }, [router, user]);
 
   /**
    * Carrega os dados do perfil do usuário do banco de dados
@@ -191,6 +237,185 @@ export default function ProfilePage() {
       console.error('Erro ao carregar fandoms:', error);
     } finally {
       setLoadingFandoms(false);
+    }
+  };
+
+  /**
+   * Carrega as fandoms seguidas pelo usuário
+   */
+  const loadFollowedFandoms = async (userId: string) => {
+    setLoadingFollowed(true);
+    try {
+      // Busca os fandom_ids que o usuário segue
+      const { data: follows, error: followsError } = await supabase
+        .from('fandom_followers')
+        .select('fandom_id')
+        .eq('user_id', userId);
+      if (followsError) {
+        setFollowedFandoms([]);
+        return;
+      }
+      const fandomIds = follows.map((f: { fandom_id: string }) => f.fandom_id);
+      if (fandomIds.length === 0) {
+        setFollowedFandoms([]);
+        return;
+      }
+      // Busca os dados das fandoms seguidas
+      const { data: fandomsData, error: fandomsError } = await supabase
+        .from('fandoms')
+        .select('*')
+        .in('id', fandomIds);
+      if (fandomsError) {
+        setFollowedFandoms([]);
+        return;
+      }
+      setFollowedFandoms(fandomsData || []);
+    } finally {
+      setLoadingFollowed(false);
+    }
+  };
+
+  /**
+   * Carrega o número de seguidores do usuário (quantas pessoas seguem as fandoms dele)
+   */
+  const loadFollowersCount = async (userId: string) => {
+    // Busca todas as fandoms criadas pelo usuário
+    const { data: fandoms, error: fandomsError } = await supabase
+      .from('fandoms')
+      .select('id')
+      .eq('creator_id', userId);
+    if (fandomsError || !fandoms || fandoms.length === 0) {
+      setFollowersCount(0);
+      return;
+    }
+    const fandomIds = fandoms.map((f: { id: string }) => f.id);
+    // Conta quantos seguidores todas as fandoms do usuário têm
+    const { count } = await supabase
+      .from('fandom_followers')
+      .select('id', { count: 'exact', head: true })
+      .in('fandom_id', fandomIds);
+    setFollowersCount(count || 0);
+  };
+
+  /**
+   * Carrega o número de fandoms que o usuário está seguindo
+   */
+  const loadFollowingCount = async (userId: string) => {
+    const { count } = await supabase
+      .from('fandom_followers')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId);
+    setFollowingCount(count || 0);
+  };
+
+  /**
+   * Carrega o número total de posts (itens) de todas as fandoms do usuário
+   */
+  const loadTotalPosts = async (userId: string) => {
+    // Busca todas as fandoms criadas pelo usuário
+    const { data: fandoms, error: fandomsError } = await supabase
+      .from('fandoms')
+      .select('id')
+      .eq('creator_id', userId);
+    if (fandomsError || !fandoms || fandoms.length === 0) {
+      setTotalPosts(0);
+      return;
+    }
+    const fandomIds = fandoms.map((f: { id: string }) => f.id);
+    // Busca todas as páginas dessas fandoms
+    const { data: pages, error: pagesError } = await supabase
+      .from('fandom_pages')
+      .select('id, fandom_id')
+      .in('fandom_id', fandomIds);
+    if (pagesError || !pages || pages.length === 0) {
+      setTotalPosts(0);
+      return;
+    }
+    const pageIds = pages.map((p: { id: string }) => p.id);
+    // Busca todas as seções dessas páginas
+    const { data: sections, error: sectionsError } = await supabase
+      .from('fandom_sections')
+      .select('id, fandom_page_id')
+      .in('fandom_page_id', pageIds);
+    if (sectionsError || !sections || sections.length === 0) {
+      setTotalPosts(0);
+      return;
+    }
+    const sectionIds = sections.map((s: { id: string }) => s.id);
+    // Conta todos os itens (posts) dessas seções
+    const { count } = await supabase
+      .from('section_items')
+      .select('id', { count: 'exact', head: true })
+      .in('section_id', sectionIds)
+      .eq('is_active', true);
+    setTotalPosts(count || 0);
+  };
+
+  /**
+   * Carrega todos os posts (itens) das fandoms do usuário
+   */
+  const loadUserPosts = async (userId: string) => {
+    setLoadingUserPosts(true);
+    try {
+      // Busca todas as fandoms criadas pelo usuário
+      const { data: fandoms, error: fandomsError } = await supabase
+        .from('fandoms')
+        .select('id, name')
+        .eq('creator_id', userId);
+      if (fandomsError || !fandoms || fandoms.length === 0) {
+        setUserPosts([]);
+        return;
+      }
+      const fandomIds = (fandoms as FandomDB[]).map((f) => f.id);
+      // Busca todas as páginas dessas fandoms
+      const { data: pages, error: pagesError } = await supabase
+        .from('fandom_pages')
+        .select('id, fandom_id')
+        .in('fandom_id', fandomIds);
+      if (pagesError || !pages || pages.length === 0) {
+        setUserPosts([]);
+        return;
+      }
+      const pageIds = (pages as PageDB[]).map((p) => p.id);
+      // Busca todas as seções dessas páginas
+      const { data: sections, error: sectionsError } = await supabase
+        .from('fandom_sections')
+        .select('id, fandom_page_id, section_title')
+        .in('fandom_page_id', pageIds);
+      if (sectionsError || !sections || sections.length === 0) {
+        setUserPosts([]);
+        return;
+      }
+      const sectionIds = (sections as SectionDB[]).map((s) => s.id);
+      // Busca todos os itens (posts) dessas seções
+      const { data: items, error: itemsError } = await supabase
+        .from('section_items')
+        .select('*')
+        .in('section_id', sectionIds)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+      if (itemsError || !items) {
+        setUserPosts([]);
+        return;
+      }
+      // Enriquecer cada item com o nome da seção e da fandom
+      const sectionMap = Object.fromEntries((sections as SectionDB[]).map((s) => [s.id, s]));
+      const pageMap = Object.fromEntries((pages as PageDB[]).map((p) => [p.id, p]));
+      const fandomMap = Object.fromEntries((fandoms as FandomDB[]).map((f) => [f.id, f]));
+      const enrichedItems = (items as ItemDB[]).map((item) => {
+        const section = sectionMap[item.section_id] as SectionDB | undefined;
+        const page = section ? (pageMap[section.fandom_page_id] as PageDB | undefined) : undefined;
+        const fandom = page ? (fandomMap[page.fandom_id] as FandomDB | undefined) : undefined;
+        return {
+          ...item,
+          sectionTitle: section ? section.section_title : '',
+          fandomId: fandom ? fandom.id : '',
+          fandomName: fandom ? fandom.name : '',
+        };
+      });
+      setUserPosts(enrichedItems);
+    } finally {
+      setLoadingUserPosts(false);
     }
   };
 
@@ -466,17 +691,17 @@ export default function ProfilePage() {
           </p>
         </div>
         {/* Seção de Suas Fandoms */}
-        <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px] blur-sm">
+        {/* <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px]">
           <p>Suas Fandoms</p>
-        </div>
+        </div> */}
         {/* Seção de Amigos */}
-        <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px]">
+        {/* <div className="flex flex-col bg-red-500 w-full lg:w-[350px] min-h-[200px] lg:min-h-[250px] p-[20px] rounded-[10px]">
           <p>Amigos</p>
-        </div>
+        </div> */}
       </div>
       {/* Seção da Direita */}
-      <div className="w-full lg:w-auto lg:flex-1">
-        {/* Seção 1 */}
+      {/* <div className="w-full lg:w-auto lg:flex-1">
+        
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex-1">
             <p className="text-lg font-semibold">Nível de Fã</p>
@@ -485,15 +710,15 @@ export default function ProfilePage() {
             <p className="text-lg font-semibold">Atividade</p>
           </div>
         </div>
-        {/* Seção 2 */}
+        
         <div className="mb-6">
           <p className="text-lg font-semibold">Publicações</p>
         </div>
-        {/* Seção 3 */}
+        
         <div>
           <p className="text-lg font-semibold">Fandoms Populares</p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 
@@ -519,8 +744,31 @@ export default function ProfilePage() {
     <div className="mt-[20px]">
       <div className="bg-white p-6 rounded-lg shadow">
         <h2 className="text-2xl font-bold mb-4">Publicações</h2>
-        <p className="text-gray-600">Nenhuma publicação encontrada.</p>
-        <p className="text-sm text-gray-500 mt-2">As publicações aparecerão aqui quando você criar conteúdo.</p>
+        {loadingUserPosts ? (
+          <p className="text-gray-600">Carregando publicações...</p>
+        ) : userPosts.length === 0 ? (
+          <>
+            <p className="text-gray-600">Nenhuma publicação encontrada.</p>
+            <p className="text-sm text-gray-500 mt-2">As publicações aparecerão aqui quando você criar conteúdo.</p>
+          </>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {userPosts.map((item) => (
+              <div key={item.id} className="bg-[#F3F4F6] rounded-lg p-4 flex flex-col items-center">
+                {item.item_image_url && (
+                  <img src={item.item_image_url} alt={item.item_title} className="w-full h-32 object-cover rounded mb-2" />
+                )}
+                <p className="text-lg font-bold text-[#5047E5] mb-1">{item.item_title}</p>
+                <p className="text-sm text-gray-700 text-center mb-1">
+                  {item.item_description && item.item_description.length > 100 ? item.item_description.substring(0, 100) + '...' : item.item_description}
+                </p>
+                <p className="text-xs text-gray-500 mb-1">Seção: {item.sectionTitle}</p>
+                <p className="text-xs text-gray-500 mb-2">Fandom: {item.fandomName}</p>
+                <a href={`/fandom/${item.fandomId}`} className="text-xs text-[#5047E5] hover:underline">Ver Fandom</a>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -528,15 +776,15 @@ export default function ProfilePage() {
   /**
    * Renderiza o conteúdo da seção Seguidores
    */
-  const renderSeguidores = () => (
-    <div className="mt-[20px]">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-2xl font-bold mb-4">Seguidores</h2>
-        <p className="text-gray-600">Nenhum seguidor encontrado.</p>
-        <p className="text-sm text-gray-500 mt-2">Quando pessoas seguirem você, elas aparecerão aqui.</p>
-      </div>
-    </div>
-  );
+  // const renderSeguidores = () => (
+  //   <div className="mt-[20px]">
+  //     <div className="bg-white p-6 rounded-lg shadow">
+  //       <h2 className="text-2xl font-bold mb-4">Seguidores</h2>
+  //       <p className="text-gray-600">Nenhum seguidor encontrado.</p>
+  //       <p className="text-sm text-gray-500 mt-2">Quando pessoas seguirem você, elas aparecerão aqui.</p>
+  //     </div>
+  //   </div>
+  // );
 
   /**
    * Renderiza o conteúdo da seção Seguindo
@@ -545,8 +793,32 @@ export default function ProfilePage() {
     <div className="mt-[20px]">
       <div className="bg-white p-6 rounded-lg shadow">
         <h2 className="text-2xl font-bold mb-4">Seguindo</h2>
-        <p className="text-gray-600">Você não está seguindo ninguém ainda.</p>
-        <p className="text-sm text-gray-500 mt-2">Quando você seguir pessoas, elas aparecerão aqui.</p>
+        {loadingFollowed ? (
+          <p className="text-gray-600">Carregando fandoms seguidas...</p>
+        ) : followedFandoms.length === 0 ? (
+          <>
+            <p className="text-gray-600">Você não está seguindo nenhuma fandom ainda.</p>
+            <p className="text-sm text-gray-500 mt-2">Quando você seguir fandoms, elas aparecerão aqui.</p>
+          </>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {followedFandoms.map(fandom => (
+              <div key={fandom.id} className="mb-4">
+                <div className="bg-[#8D6FF5] rounded-lg p-4 flex flex-col items-center">
+                  <p className="text-lg font-bold text-white mb-2">{fandom.name}</p>
+                  <p className="text-sm text-[#DBD1FC] text-center mb-2">
+                    {fandom.description.length > 100 ? fandom.description.substring(0, 100) + '...' : fandom.description}
+                  </p>
+                  <Link href={`/fandom/${fandom.id}`} className="mt-2">
+                    <button className="bg-[#A28BF7] hover:bg-[#AE9AF8] rounded-[5px] p-[8px] w-[100px] text-white transition-all duration-200">
+                      Explorar
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -554,28 +826,28 @@ export default function ProfilePage() {
   /**
    * Renderiza o conteúdo da seção Amigos
    */
-  const renderAmigos = () => (
-    <div className="mt-[20px]">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-2xl font-bold mb-4">Amigos</h2>
-        <p className="text-gray-600">Nenhum amigo encontrado.</p>
-        <p className="text-sm text-gray-500 mt-2">Quando você adicionar amigos, eles aparecerão aqui.</p>
-      </div>
-    </div>
-  );
+  // const renderAmigos = () => (
+  //   <div className="mt-[20px]">
+  //     <div className="bg-white p-6 rounded-lg shadow">
+  //       <h2 className="text-2xl font-bold mb-4">Amigos</h2>
+  //       <p className="text-gray-600">Nenhum amigo encontrado.</p>
+  //       <p className="text-sm text-gray-500 mt-2">Quando você adicionar amigos, eles aparecerão aqui.</p>
+  //     </div>
+  //   </div>
+  // );
 
   /**
    * Renderiza o conteúdo da seção Conquistas
    */
-  const renderConquistas = () => (
-    <div className="mt-[20px]">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-2xl font-bold mb-4">Conquistas</h2>
-        <p className="text-gray-600">Nenhuma conquista desbloqueada ainda.</p>
-        <p className="text-sm text-gray-500 mt-2">Continue participando para desbloquear conquistas!</p>
-      </div>
-    </div>
-  );
+  // const renderConquistas = () => (
+  //   <div className="mt-[20px]">
+  //     <div className="bg-white p-6 rounded-lg shadow">
+  //       <h2 className="text-2xl font-bold mb-4">Conquistas</h2>
+  //       <p className="text-gray-600">Nenhuma conquista desbloqueada ainda.</p>
+  //       <p className="text-sm text-gray-500 mt-2">Continue participando para desbloquear conquistas!</p>
+  //     </div>
+  //   </div>
+  // );
 
   /**
    * Renderiza o conteúdo da seção Configurações
@@ -624,14 +896,14 @@ export default function ProfilePage() {
         return renderFandoms();
       case 'publicacoes':
         return renderPublicacoes();
-      case 'seguidores':
-        return renderSeguidores();
+      // case 'seguidores':
+      //   return renderSeguidores();
       case 'seguindo':
         return renderSeguindo();
-      case 'amigos':
-        return renderAmigos();
-      case 'conquistas':
-        return renderConquistas();
+      // case 'amigos':
+      //   return renderAmigos();
+      // case 'conquistas':
+      //   return renderConquistas();
       case 'configuracoes':
         return renderConfiguracoes();
       default:
@@ -749,30 +1021,30 @@ export default function ProfilePage() {
           </p>
           <p className="text-[14px] sm:text-[16px] lg:text-[18px]" style={{ color: profileSettings.textColor }}>Fandoms</p>
         </div>
-        <div className="flex flex-col items-center blur-sm">
-          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
+        <div className="flex flex-col items-center">
+          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">{totalPosts}</p>
           <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Publicações</p>
         </div>
-        <div className="flex flex-col items-center blur-sm">
-          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
+        <div className="flex flex-col items-center">
+          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">{followersCount}</p>
           <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Seguidores</p>
         </div>
-        <div className="flex flex-col items-center blur-sm">
-          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
+        <div className="flex flex-col items-center">
+          <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">{followingCount}</p>
           <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Seguindo</p>
         </div>
-        <div className="flex flex-col items-center blur-sm">
+        {/* <div className="flex flex-col items-center blur-sm">
           <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
           <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Amigos</p>
         </div>
         <div className="flex flex-col items-center blur-sm">
           <p className="text-[20px] sm:text-[24px] lg:text-[30px] font-bold">X</p>
           <p className="text-[14px] sm:text-[16px] lg:text-[18px]">Conquistas</p>
-        </div>
+        </div> */}
       </div>
 
       {/* Seção de Buttons */}
-      <div className="flex gap-2 sm:gap-[10px] px-4 sm:px-6 lg:px-[100px] pt-[25px] pb-[10px] border-b border-gray-300 overflow-x-auto">
+      <div className="flex gap-2 sm:gap-[10px] px-4 sm:px-6 lg:px-[100px] pt-[25px] pb-[10px] border-b border-gray-300 overflow-x-auto justify-center">
         <button 
           onClick={() => handleSectionChange('visao-geral')}
           className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
@@ -857,7 +1129,7 @@ export default function ProfilePage() {
         >
           Publicações
         </button>
-        <button 
+        {/* <button 
           onClick={() => handleSectionChange('seguidores')}
           className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
             activeSection === 'seguidores' ? 'ring-2 ring-blue-500' : ''
@@ -884,7 +1156,7 @@ export default function ProfilePage() {
           }}
         >
           Seguidores
-        </button>
+        </button> */}
         <button 
           onClick={() => handleSectionChange('seguindo')}
           className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
@@ -913,7 +1185,7 @@ export default function ProfilePage() {
         >
           Seguindo
         </button>
-        <button 
+        {/* <button 
           onClick={() => handleSectionChange('amigos')}
           className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
             activeSection === 'amigos' ? 'ring-2 ring-blue-500' : ''
@@ -940,8 +1212,8 @@ export default function ProfilePage() {
           }}
         >
           Amigos
-        </button>
-        <button 
+        </button> */}
+        {/* <button 
           onClick={() => handleSectionChange('conquistas')}
           className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${
             activeSection === 'conquistas' ? 'ring-2 ring-blue-500' : ''
@@ -968,7 +1240,7 @@ export default function ProfilePage() {
           }}
         >
           Conquistas
-        </button>
+        </button> */}
         <button 
           onClick={() => handleSectionChange('configuracoes')}
           className={`text-[16px] sm:text-[18px] lg:text-[20px] transition-colors duration-200 rounded px-2 py-1 whitespace-nowrap flex-shrink-0 ${

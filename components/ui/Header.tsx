@@ -52,7 +52,9 @@ export default function Header() {
 
   return (
     <div className="flex justify-around items-center bg-[#926DF6] text-white shadow-lg">
-      <p className="text-[50px] font-bold">FandomVerse</p>
+      <Link href="/">
+        <p className="text-[50px] font-bold">FandomVerse</p>
+      </Link>
       {/* FetchInstruments é para checar pelo console.log se os arrays estão vindo */}
       {/* <FetchInstruments /> */}
 
