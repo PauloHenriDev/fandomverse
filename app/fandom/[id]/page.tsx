@@ -714,7 +714,7 @@ export default function FandomPage() {
                 ) : (
                   <div className="col-span-full text-center py-8">
                     <p className="text-white text-lg">Nenhuma raça criada ainda.</p>
-                    <p className="text-white/70 text-sm mt-2">Clique em "Ver Todas as Raças" para adicionar sua primeira raça!</p>
+                    <p className="text-white/70 text-sm mt-2">Clique em &quot;Ver Todas as Raças&quot; para adicionar sua primeira raça!</p>
                   </div>
                 )}
               </CardGrid>

@@ -13,6 +13,11 @@ export interface Fandom {
   postsCount?: number;
 }
 
+// Add FandomSection interface for type safety
+interface FandomSection {
+  id: string;
+}
+
 export function useFandoms() {
   const [fandoms, setFandoms] = useState<Fandom[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +62,7 @@ export function useFandoms() {
               .eq('fandom_page_id', pageData.id);
             if (sectionsData && sectionsData.length > 0) {
               // Buscar número de itens (posts) em todas as seções
-              const sectionIds = sectionsData.map((s: any) => s.id);
+              const sectionIds = (sectionsData as FandomSection[]).map((s) => s.id);
               const { count: itemsCount } = await supabase
                 .from('section_items')
                 .select('id', { count: 'exact', head: true })
