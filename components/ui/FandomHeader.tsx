@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 import { User, Session } from "@supabase/supabase-js";
 import Link from "next/link";
@@ -62,7 +62,7 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
   };
 
   // Verifica se o usuário já segue a fandom
-  const checkIfFollowing = async (userId: string) => {
+  const checkIfFollowing = useCallback(async (userId: string) => {
     if (!fandomId || !userId) return;
     const { data, error } = await supabase
       .from('fandom_followers')
@@ -71,7 +71,7 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
       .eq('user_id', userId)
       .single();
     setIsFollowing(!!data && !error);
-  };
+  }, [fandomId]);
 
   // Seguir fandom
   const handleFollow = async () => {

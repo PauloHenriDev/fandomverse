@@ -151,7 +151,7 @@ export default function ProfilePage() {
       // Carrega fandoms do usuário
       loadUserFandoms(user.id);
     });
-  }, [router]);
+  }, [router, loadProfile]);
 
   useEffect(() => {
     if (user) {
@@ -756,7 +756,7 @@ export default function ProfilePage() {
             {userPosts.map((item) => (
               <div key={item.id} className="bg-[#F3F4F6] rounded-lg p-4 flex flex-col items-center">
                 {item.item_image_url && (
-                  <img src={item.item_image_url} alt={item.item_title} className="w-full h-32 object-cover rounded mb-2" />
+                  <Image src={item.item_image_url} alt={item.item_title} width={300} height={128} className="w-full h-32 object-cover rounded mb-2" unoptimized />
                 )}
                 <p className="text-lg font-bold text-[#5047E5] mb-1">{item.item_title}</p>
                 <p className="text-sm text-gray-700 text-center mb-1">

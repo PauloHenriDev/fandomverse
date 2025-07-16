@@ -77,7 +77,6 @@ interface Category {
  */
 export default function RacesPage() {
   const params = useParams();
-  const router = useRouter();
   const fandomId = params.id as string;
 
   // Estados para gerenciar dados da página
@@ -165,10 +164,8 @@ export default function RacesPage() {
 
   // Carregar filtros quando a página carregar
   useEffect(() => {
-    if (fandomPage) {
-      loadFilters();
-    }
-  }, [fandomPage]);
+    loadFilters();
+  }, [loadFilters]);
 
   // Função para filtrar raças por categoria
   const filterRacesByCategory = useCallback((categoryId: string) => {
