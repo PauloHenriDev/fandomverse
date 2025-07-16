@@ -20,6 +20,18 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
   const [loadingFollow, setLoadingFollow] = useState<boolean>(false);
 
+  // Verifica se o usuário já segue a fandom
+  const checkIfFollowing = useCallback(async (userId: string) => {
+    if (!fandomId || !userId) return;
+    const { data, error } = await supabase
+      .from('fandom_followers')
+      .select('id')
+      .eq('fandom_id', fandomId)
+      .eq('user_id', userId)
+      .single();
+    setIsFollowing(!!data && !error);
+  }, [fandomId]);
+
   useEffect(() => {
     // Verifica usuário atual
     supabase.auth.getUser().then(({ data: { user } }: { data: { user: User | null } }) => {
@@ -60,18 +72,6 @@ export default function FandomHeader({ fandomName, fandomDescription, fandomId, 
       if (data.avatar_url) setAvatarUrl(data.avatar_url);
     }
   };
-
-  // Verifica se o usuário já segue a fandom
-  const checkIfFollowing = useCallback(async (userId: string) => {
-    if (!fandomId || !userId) return;
-    const { data, error } = await supabase
-      .from('fandom_followers')
-      .select('id')
-      .eq('fandom_id', fandomId)
-      .eq('user_id', userId)
-      .single();
-    setIsFollowing(!!data && !error);
-  }, [fandomId]);
 
   // Seguir fandom
   const handleFollow = async () => {
