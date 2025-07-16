@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS section_filters (
     section_id UUID NOT NULL REFERENCES fandom_sections(id) ON DELETE CASCADE,
     filter_label VARCHAR(100) NOT NULL,
     filter_value VARCHAR(100) NOT NULL,
-    is_active BOOLEAN DEFAULT false,
+    is_active BOOLEAN DEFAULT true,
     filter_order INTEGER NOT NULL,
     filter_color VARCHAR(7) DEFAULT '#926DF6',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -232,9 +232,14 @@ BEGIN
         (characters_section_id, 'Antagonistas', 'antagonists', false, 3),
         (characters_section_id, 'Secundários', 'supporting', false, 4);
 
+    -- Cria seção de Raças/Espécies
+    INSERT INTO fandom_sections (fandom_page_id, section_type, section_title, section_description, section_order)
+    VALUES (page_id, 'filter', 'Raças/Espécies', 'Seção para gerenciar raças e espécies da fandom', 3)
+    RETURNING id INTO regions_section_id;
+
     -- Cria seção de Regiões
     INSERT INTO fandom_sections (fandom_page_id, section_type, section_title, section_description, section_order)
-    VALUES (page_id, 'filter', 'Regiões', 'Explore as regiões deste universo', 3)
+    VALUES (page_id, 'filter', 'Regiões', 'Explore as regiões deste universo', 4)
     RETURNING id INTO regions_section_id;
 
     -- Adiciona filtros para regiões

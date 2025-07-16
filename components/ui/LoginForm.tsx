@@ -16,7 +16,7 @@ export default function LoginForm() {
     setError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setError(error.message);
-    else router.push("/"); // Redireciona para home após login
+    else router.push("/");
   };
 
   return (

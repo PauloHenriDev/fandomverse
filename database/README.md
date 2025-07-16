@@ -97,6 +97,64 @@ Com esta configuração, você terá:
 - ✅ Segurança baseada em usuário (RLS)
 - ✅ Timestamps automáticos
 
+## Seção de Raças/Espécies
+
+### 3. Scripts para Raças/Espécies
+
+#### `create_races_section.sql`
+Cria a seção de raças/espécies para uma fandom existente, incluindo:
+- Seção "Raças/Espécies" na página da fandom
+- Filtros padrão (Humanoides, Bestiais, Místicos, etc.)
+- Raças de exemplo (Humano, Elfo, Anão, etc.)
+
+#### `add_sample_races.sql`
+Adiciona raças de exemplo para diferentes tipos de fandoms:
+- **RPG/Fantasia**: Humanos, Elfos, Anões, Orcs, Dragões, etc.
+- **Ficção Científica**: Humanos, Aliens, Robôs, Ciborgues, etc.
+- **Anime/Mangá**: Humanos, Demônios, Anjos, Espíritos, etc.
+
+#### `check_races_data.sql`
+Scripts para verificar e gerenciar dados de raças:
+- Listar seções de raças existentes
+- Verificar filtros e raças
+- Estatísticas por categoria
+- Operações de limpeza e manutenção
+
+### Como Configurar a Seção de Raças
+
+1. **Execute o script principal**:
+   ```sql
+   -- No SQL Editor do Supabase, execute o conteúdo de create_races_section.sql
+   -- Substitua 'PAGE_ID_AQUI' pelo ID real da página da fandom
+   ```
+
+2. **Adicione raças de exemplo**:
+   ```sql
+   -- Execute o conteúdo de add_sample_races.sql
+   -- Substitua 'RACES_SECTION_ID_AQUI' pelo ID real da seção
+   ```
+
+3. **Verifique os dados**:
+   ```sql
+   -- Execute as queries de verificação em check_races_data.sql
+   ```
+
+### Estrutura de Dados para Raças
+
+#### Tabela `fandom_sections`:
+- `section_title`: 'Raças/Espécies'
+- `section_type`: 'filter'
+- `section_order`: 2 (após personagens)
+
+#### Tabela `section_filters`:
+- Filtros para categorizar raças
+- Exemplos: Humanoides, Bestiais, Místicos, etc.
+
+#### Tabela `section_items`:
+- `item_type`: 'race'
+- `custom_data`: JSON com categorias
+- Exemplo: `{"categories": ["humanoids", "mystical"]}`
+
 ## Próximos Passos
 
 Após configurar o banco de dados, você pode:
@@ -105,4 +163,6 @@ Após configurar o banco de dados, você pode:
 2. Verificar se as fandoms aparecem no perfil do usuário
 3. Testar a personalização do perfil na página `/profile`
 4. Implementar a página de edição de fandoms
-5. Adicionar funcionalidades como categorias, tags, etc. 
+5. Configurar a seção de raças/espécies
+6. Adicionar raças personalizadas via interface
+7. Testar o sistema de filtros por categoria 

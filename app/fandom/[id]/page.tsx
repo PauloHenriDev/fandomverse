@@ -7,6 +7,7 @@ import Link from "next/link";
 import FandomHeader from "@/components/ui/FandomHeader";
 import { HeroSection, CardGrid } from "@/components/templates";
 import CharacterCard from "@/components/ui/CharacterCard";
+import RaceCard from "@/components/ui/RaceCard";
 
 // Interfaces para os dados da página
 interface FandomPage {
@@ -94,6 +95,13 @@ export default function FandomPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filteredCharacters, setFilteredCharacters] = useState<SectionItem[]>([]);
 
+  // Estados para raças
+  const [racesCategories, setRacesCategories] = useState<Category[]>([
+    { id: 'all', name: 'Todos', isActive: true }
+  ]);
+  const [selectedRaceCategory, setSelectedRaceCategory] = useState<string>('all');
+  const [filteredRaces, setFilteredRaces] = useState<SectionItem[]>([]);
+
   // Função para carregar filtros do banco de dados
   const loadFilters = useCallback(async () => {
     try {
@@ -159,12 +167,78 @@ export default function FandomPage() {
     }
   }, [fandomPage]);
 
+  // Função para carregar filtros de raças do banco de dados
+  const loadRacesFilters = useCallback(async () => {
+    try {
+      console.log('loadRacesFilters chamada - fandomPage:', fandomPage?.id);
+      if (!fandomPage) return;
+
+      // Carregar seção de raças
+      const { data: sectionsData, error: sectionsError } = await supabase
+        .from('fandom_sections')
+        .select('*')
+        .eq('fandom_page_id', fandomPage.id)
+        .eq('section_title', 'Raças/Espécies')
+        .single();
+
+      if (sectionsError) {
+        console.error('Erro ao carregar seção de raças:', sectionsError);
+        return;
+      }
+
+      // Carregar filtros de raças
+      const { data: filtersData, error: filtersError } = await supabase
+        .from('section_filters')
+        .select('*')
+        .eq('section_id', sectionsData.id)
+        .eq('is_active', true)
+        .order('filter_order');
+
+      if (filtersError) {
+        console.error('Erro ao carregar filtros de raças:', filtersError);
+        return;
+      }
+
+      console.log('Filtros de raças carregados do banco:', filtersData);
+
+      // Converter filtros do banco para o formato da interface
+      const dbCategories: Category[] = [];
+
+      // Adiciona filtros do banco de dados (excluindo qualquer filtro com valor 'all')
+      filtersData?.forEach(filter => {
+        if (filter.filter_value !== 'all') {
+          dbCategories.push({
+            id: filter.filter_value,
+            name: filter.filter_label,
+            isActive: false
+          });
+        }
+      });
+
+      console.log('Categorias de raças do banco processadas:', dbCategories);
+
+      // Cria array final com "Todos" + filtros do banco
+      const finalCategories: Category[] = [
+        { id: 'all', name: 'Todos', isActive: true },
+        ...dbCategories
+      ];
+
+      console.log('Categorias de raças finais:', finalCategories);
+
+      // Atualiza as categorias de raças
+      setRacesCategories(finalCategories);
+    } catch (error) {
+      console.error('Erro ao carregar filtros de raças:', error);
+    }
+  }, [fandomPage]);
+
   // Carregar filtros quando a página carregar
   useEffect(() => {
     if (fandomPage) {
       loadFilters();
+      loadRacesFilters();
     }
-  }, [fandomPage]);
+  }, [fandomPage, loadFilters, loadRacesFilters]);
 
   // Função para filtrar personagens por categoria
   const filterCharactersByCategory = useCallback((categoryId: string) => {
@@ -198,6 +272,44 @@ export default function FandomPage() {
     filterCharactersByCategory(categoryId);
   };
 
+  // Função para filtrar raças por categoria
+  const filterRacesByCategory = useCallback((categoryId: string) => {
+    // Busca raças na seção de raças
+    const racesSection = sections.find(section => section.section_title === 'Raças/Espécies');
+    console.log('Seção de raças encontrada:', racesSection);
+    
+    const allRaces = racesSection ? items[racesSection.id] || [] : [];
+    console.log('Todas as raças carregadas:', allRaces);
+    
+    if (categoryId === 'all') {
+      // Mostra todas as raças (máximo 4 para a homepage)
+      const limitedRaces = allRaces.slice(0, 4);
+      console.log('Raças limitadas para homepage:', limitedRaces);
+      setFilteredRaces(limitedRaces);
+    } else {
+      // Filtra por categoria específica
+      const filtered = allRaces.filter(race => 
+        race.custom_data?.categories?.includes(categoryId)
+      ).slice(0, 4); // Máximo 4 raças para a homepage
+      console.log('Raças filtradas por categoria:', filtered);
+      setFilteredRaces(filtered);
+    }
+  }, [sections, items]);
+
+  // Função para mudar categoria de raça ativa
+  const handleRaceCategoryChange = (categoryId: string) => {
+    setSelectedRaceCategory(categoryId);
+    
+    // Atualiza estado das categorias de raças
+    setRacesCategories(prev => prev.map(cat => ({
+      ...cat,
+      isActive: cat.id === categoryId
+    })));
+    
+    // Filtra raças
+    filterRacesByCategory(categoryId);
+  };
+
   // Função para ir para página de personagens
   const handleViewMoreCharacters = () => {
     router.push(`/fandom/${fandomId}/characters`);
@@ -207,6 +319,11 @@ export default function FandomPage() {
   useEffect(() => {
     filterCharactersByCategory(selectedCategory);
   }, [filterCharactersByCategory, selectedCategory]);
+
+  // Inicializa raças filtradas quando o componente carrega
+  useEffect(() => {
+    filterRacesByCategory(selectedRaceCategory);
+  }, [filterRacesByCategory, selectedRaceCategory]);
 
   // Hook que executa quando o componente é montado
   const loadPageData = useCallback(async () => {
@@ -248,12 +365,15 @@ export default function FandomPage() {
       if (sectionsError) {
         console.error('Erro ao carregar seções:', sectionsError);
       } else {
+        console.log('Seções carregadas:', sectionsData);
         setSections(sectionsData || []);
 
         // Carrega itens da seção
         const itemsData: { [sectionId: string]: SectionItem[] } = {};
 
         for (const section of sectionsData || []) {
+          console.log(`Carregando itens da seção: ${section.section_title} (ID: ${section.id})`);
+          
           // Carrega itens da seção
           const { data: items, error: itemsError } = await supabase
             .from('section_items')
@@ -264,9 +384,13 @@ export default function FandomPage() {
 
           if (!itemsError) {
             itemsData[section.id] = items || [];
+            console.log(`Itens carregados para ${section.section_title}:`, items);
+          } else {
+            console.error(`Erro ao carregar itens da seção ${section.section_title}:`, itemsError);
           }
         }
 
+        console.log('Todos os itens carregados:', itemsData);
         setItems(itemsData);
       }
 
@@ -540,8 +664,64 @@ export default function FandomPage() {
                 </button>
               </div>
             </div>
+            {/* Seção de Raças/Espécies */}
+            <div className="mt-[50px]">
+              <div className="flex justify-between items-center mb-6">
+                <p className="text-[50px] text-white font-bold">Raças/Espécies</p>
+                <Link
+                  href={`/fandom/${fandomId}/races`}
+                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm"
+                >
+                  Ver Todas as Raças
+                </Link>
+              </div>
+              
+              {/* Carrossel de Categorias de Raças */}
+              {racesCategories.length > 1 && (
+                <div className="bg-blue-500 p-[5px] rounded-[10px] w-fit max-w-full mt-[15px] overflow-hidden mb-[15px]">
+                  <div className="flex text-[15px] overflow-x-auto gap-[10px]">
+                    {racesCategories.map((category) => (
+                      <button
+                        key={category.id}
+                        className={`pt-[10px] pb-[10px] pl-[20px] pr-[20px] rounded-[10px] transition-all duration-250 whitespace-nowrap ${
+                          category.isActive 
+                            ? 'bg-red-600 text-white' 
+                            : 'bg-red-500 text-white hover:bg-red-600'
+                        }`}
+                        onClick={() => handleRaceCategoryChange(category.id)}
+                      >
+                        {category.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Grid de Raças */}
+              <CardGrid className="gap-[20px]">
+                {filteredRaces.length > 0 ? (
+                  filteredRaces.map((race) => (
+                    <RaceCard
+                      key={race.id}
+                      id={race.id}
+                      title={race.item_title}
+                      description={race.item_description}
+                      image_url={race.item_image_url}
+                      color={race.item_color}
+                      fandomId={fandomId}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-8">
+                    <p className="text-white text-lg">Nenhuma raça criada ainda.</p>
+                    <p className="text-white/70 text-sm mt-2">Clique em "Ver Todas as Raças" para adicionar sua primeira raça!</p>
+                  </div>
+                )}
+              </CardGrid>
+            </div>
+
             {/* Seção de Regiões */}
-            <div>
+            <div className="mt-[50px]">
               <p className="text-[50px] text-white font-bold ">Regiões</p>
               {/* Vou montar o resto no futuro */}
             </div>

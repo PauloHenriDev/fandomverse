@@ -143,7 +143,7 @@ export default function ManageFiltersPage() {
           filter_value: newFilterValue,
           filter_order: newOrder,
           filter_color: newFilterColor,
-          is_active: false
+          is_active: true
         })
         .select()
         .single();
